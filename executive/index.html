@@ -1467,8 +1467,7 @@ async function openPrintPdf(){
   try{
     const pages=[];
     for(let i=0;i<slides.length;i++){
-      current=i;render();
-      const frame=buildPresentFrame(i);frame.classList.add('print-slide','premium-print-slide');frame.style.transform='none';
+      const frame=await captureExportScene(i);frame.classList.add('print-slide','premium-print-slide');frame.style.transform='none';
       pages.push(frame);
       await new Promise(resolve=>requestAnimationFrame(resolve));
     }
