@@ -1300,6 +1300,35 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 #stage:has(.uat-cover-brands) .uat-cover-brands,#stage:has(.uat-cover-brands) .uat-presenter{z-index:30}
 #stage:has(.uat-cover-brands) .slidebody{z-index:6!important}
 </style>
+<style id="uat-r1c">
+.uat-print-guard{}
+.uat-hub{flex:1;min-height:0;display:grid;grid-template-columns:1.3fr 1fr;gap:22px}
+.uat-hub-kpis{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;gap:14px}
+.uat-hub-kpis>div{background:#fff;border:1px solid #e1dbe8;border-left:7px solid #522975;border-radius:16px;padding:14px 20px;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.uat-hub-kpis>div.o{border-left-color:#ff7f02}
+.uat-hub-kpis small{font-size:16px;font-weight:700;color:#5e5a67}
+.uat-hub-kpis b{font:800 50px/1.05 Inter,sans-serif;color:#522975;letter-spacing:-1px;display:flex;align-items:baseline;gap:8px}
+.uat-hub-kpis .o b{color:#d96a00}
+.uat-hub-kpis b i{font:700 18px 'IBM Plex Sans Thai',sans-serif;font-style:normal;color:#17151d;letter-spacing:0}
+.uat-hub-kpis span{font-size:15px;color:#3f3b48}
+.uat-roadmap{background:#fff;border:1px solid #e1dbe8;border-radius:18px;padding:18px 20px;display:flex;flex-direction:column;gap:10px}
+.uat-roadmap-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #eee9f2;padding-bottom:8px}
+.uat-roadmap-head b{font-size:20px;color:#17151d}.uat-roadmap-head small{font-size:14px;color:#5e5a67}
+.uat-phase{flex:1;display:grid;grid-template-columns:92px 1fr auto;align-items:center;gap:14px;background:#f7f6f8;border-radius:14px;padding:10px 14px}
+.uat-phase .ph{font:800 14px Inter,sans-serif;color:#fff;background:#522975;border-radius:9px;padding:7px 0;text-align:center}
+.uat-phase strong{display:block;font:800 19px Inter,'IBM Plex Sans Thai',sans-serif;color:#17151d}
+.uat-phase small{display:block;font-size:14px;line-height:1.35;color:#4b4756}
+.uat-phase em{font-style:normal;font-size:14px;font-weight:700;border-radius:999px;padding:6px 12px;white-space:nowrap}
+.uat-phase.live em{background:#e5f6ec;color:#167a3e}
+.uat-phase.open em{background:#f6f0fa;color:#522975}
+.uat-phase.next em{background:#fff1e1;color:#b45600}
+.uat-phase.next .ph{background:#ff7f02}
+.uat-hub-links{display:flex;align-items:center;gap:12px;flex:none}
+.uat-hub-links span{font-size:15px;font-weight:700;color:#5e5a67;margin-right:4px}
+.uat-hub-links a{background:#522975;color:#fff!important;text-decoration:none;border-radius:12px;padding:10px 18px;font-size:16px;font-weight:700}
+.uat-hub-links a:nth-of-type(2){background:#ff7f02;color:#241204!important}
+.uat-hub-links a:nth-of-type(3){background:#fff;color:#522975!important;border:1px solid #dccbea}
+</style>
 <div id="presentOverlay" class="present-overlay" role="dialog" aria-label="โหมดนำเสนอผู้บริหาร" aria-modal="true" hidden>
   <div id="presentViewport" class="present-viewport"></div>
   <div class="present-hotzone present-left" data-direction="-1" title="ย้อนกลับ" aria-label="ย้อนกลับ"></div>
@@ -1313,7 +1342,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 (()=>{
 const source=JSON.parse(document.getElementById('planData').textContent);
 const plans=source.plans, results=source.results;
-const navs=["ฝ่ายความปลอดภัย SGE & AESCON","ทีมงาน จป.วิชาชีพ","ผลการดำเนินงานปี 2569","ตรวจความปลอดภัยหน้างาน","การอบรมและพัฒนาบุคลากร","PPE และความพร้อมก่อนทำงาน","การควบคุมผู้รับเหมา","Smart Safety Portal","งานที่ต้องติดตามต่อ","เป้าหมายความปลอดภัยปี 2570","แผนงานปี 2570 · SGE","แผนงานปี 2570 · AESCON","งบประมาณแผนปี 2570","เหตุผลและข้อมูลประกอบงบ","สรุปแผนและข้อซักถาม"];
+const navs=["ฝ่ายความปลอดภัย SGE & AESCON","ทีมงาน จป.วิชาชีพ","ผลการดำเนินงานปี 2569","ตรวจความปลอดภัยหน้างาน","การอบรมและพัฒนาบุคลากร","PPE และความพร้อมก่อนทำงาน","การควบคุมผู้รับเหมา","5 เดือน ระบบใช้งานจริง","งานที่ต้องติดตามต่อ","เป้าหมายความปลอดภัยปี 2570","แผนงานปี 2570 · SGE","แผนงานปี 2570 · AESCON","งบประมาณแผนปี 2570","เหตุผลและข้อมูลประกอบงบ","สรุปแผนและข้อซักถาม"];
 const photoSpecs=[
  {id:'cover',company:'SGE / AESCON',topic:'ภาพรวมโรงงาน SGE และไซต์ก่อสร้าง AESCON'},
  {id:'result_sge',company:'SGE',topic:'ภาพกิจกรรม 5ส ในโรงงาน SGE ปี 2569'},
@@ -1517,12 +1546,17 @@ const slides=[
 slides[2].tag='03 / ผลดำเนินงานปี 2569';
 function uatQuarters(){const q={SGE:[0,0,0,0],AESCON:[0,0,0,0]};plans.forEach(p=>{const ms=String(p.months||'').split(',').map(x=>parseInt(x,10)).filter(n=>n>=1&&n<=12);new Set(ms.map(m=>Math.floor((m-1)/3))).forEach(k=>{if(q[p.c])q[p.c][k]++})});return q}
 function uatTargets(){const q=uatQuarters();const T=[
- ['01','Pre-Work Safety Gate','ผู้รับเหมาผ่านครบ 7 ขั้นก่อนเริ่มงาน','2569: เสนอหลักการ “ไม่พร้อม = ยังไม่เริ่มงาน”','100%','ของผู้รับเหมาที่เข้าพื้นที่','Contractor / Work Permit ใน Portal'],
+ ['01','Pre-Work Safety Gate','ผู้รับเหมาผ่านครบ 7 ขั้นก่อนเริ่มงาน','2569: ลงทะเบียน 139 คน · ผ่านอบรม 87 · Permit 42 ใบ','100%','ของผู้รับเหมาที่เข้าพื้นที่','Contractor / Work Permit ใน Portal'],
  ['02','ปิดงานค้างปี 2569','SGE ยังไม่ทำ 16 + ช้ากว่าแผน 2','ณ ก.ย. 2569: ค้าง 18 รายการ','18 / 18','ปิดภายในไตรมาส 2 / 2570','ทะเบียน EF-27'],
  ['03','ชั่วโมงอบรมตามแผน','อบรมตามกฎหมายและงานเสี่ยง','2569: SGE 96.6% · AESCON 107.5%','≥ 100%','ทั้ง SGE และ AESCON','KPI อบรมรายเดือน'],
- ['04','Near Miss → แก้ไขจริง','ทุกเรื่องมีผู้รับผิดชอบและวันปิด','2569: เริ่มรายงานผ่าน Near Miss Center','100%','มี Corrective Action','Near Miss Center'],
+ ['04','Near Miss → แก้ไขจริง','ทุกเรื่องมีผู้รับผิดชอบและวันปิด','2569: รายงาน 59 เรื่อง · ปิดแล้ว 15 (25%)','100%','มี Corrective Action','Near Miss Center'],
  ['05','แผน HSE 2570','99 กิจกรรม · 2,623,000 บาท','EF-27 41 กิจกรรม · F-SA-14 58 กิจกรรม','99 / 99','รายงานสถานะทุกเดือน','Annual HSE Plan · ทบทวนรายไตรมาส']];
  return '<div class="uat-layout"><div class="uat-targets">'+T.map(t=>'<section class="uat-target"><div class="uat-target-top"><b>'+t[0]+'</b><span>'+esc(t[1])+'</span></div><div class="uat-target-goal"><strong>'+esc(t[4])+'</strong><small>'+esc(t[5])+'</small></div><p>'+esc(t[2])+'</p><div class="uat-target-base">'+esc(t[3])+'</div><div class="uat-target-src">วัดผลจาก · '+esc(t[6])+'</div></section>').join('')+'</div><div class="uat-quarters"><div class="lbl"><b>ปฏิทินกิจกรรมตามแผน 2570</b><small>จำนวนกิจกรรมที่มีกำหนดดำเนินการในแต่ละไตรมาส</small></div>'+[0,1,2,3].map(k=>'<div class="q"><span>ไตรมาส '+(k+1)+'</span><b>'+q.SGE[k]+'<i>SGE</i></b><b class="o">'+q.AESCON[k]+'<i>AESCON</i></b></div>').join('')+'</div><div class="uat-note">ร่างเป้าหมายเพื่อเสนอผู้บริหารพิจารณา · ค่าฐานอ้างอิงทะเบียนผลดำเนินงาน ณ ก.ย. 2569 และแผน EF-27 / F-SA-14 ปี 2570</div></div>'}
+function uatHub(){
+ const K=[['ผู้รับเหมาลงทะเบียน','139','คน','ผ่านอบรมแล้ว 87 คน','Induction'],['Work Permit','42','ใบ','ปิดงานเรียบร้อย 34 ใบ','Permit'],['Near Miss','59','เรื่อง','SGE 39 · AESCON 20 · ปิดแล้ว 15','Near Miss'],['Daily Report','276','รายงาน','AESCON 167 · SGE 109','Daily'],['ตรวจรถประจำวัน','1,577','ครั้ง','รถในระบบ 51 คัน','Vehicle'],['ตรวจถังดับเพลิง','33','ถัง','ทะเบียนเครื่องมือ SGE 251 รายการ','Fire']];
+ const P=[['Phase 1','Contractor','ทะเบียนผู้รับเหมา · อบรม · Work Permit','ใช้งานจริง','live'],['Phase 2','Employee','สำรวจสุขภาพ · Psychosocial · Kaizen','เปิดระบบแล้ว','open'],['Phase 3','Admin / Dashboard','Near Miss · Daily Report · ตรวจรถ · ถังดับเพลิง','ใช้งานจริง','live'],['Phase 4','Report & Improvement','ปิด Near Miss แล้ว 15 จาก 59 เรื่อง','เริ่มแล้ว · ต่อยอดปี 2570','next']];
+ return '<div class="uat-layout"><div class="uat-hub"><div class="uat-hub-kpis">'+K.map((k,i)=>'<div class="'+(i%2?'o':'')+'"><small>'+esc(k[0])+'</small><b>'+k[1]+'<i>'+esc(k[2])+'</i></b><span>'+esc(k[3])+'</span></div>').join('')+'</div><div class="uat-roadmap"><div class="uat-roadmap-head"><b>Roadmap ที่เสนอเมื่อ มิ.ย. 2569</b><small>สถานะ ณ พ.ย. 2569</small></div>'+P.map(p=>'<div class="uat-phase '+p[4]+'"><span class="ph">'+p[0]+'</span><div><strong>'+esc(p[1])+'</strong><small>'+esc(p[2])+'</small></div><em>'+esc(p[3])+'</em></div>').join('')+'</div></div><div class="uat-hub-links"><span>เปิดระบบจริงระหว่างนำเสนอ</span><a href="'+REAL_PORTAL+'" target="_blank" rel="noopener noreferrer">AES &amp; SGE Work Hub ↗</a><a href="'+CONTRACTOR_URL+'" target="_blank" rel="noopener noreferrer">ระบบผู้รับเหมา ↗</a><a href="'+PLAN_URL+'" target="_blank" rel="noopener noreferrer">แผน HSE 2570 ↗</a></div><div class="uat-note">ข้อมูลจากระบบ (AESCON_SGE_Safety_V2) มิ.ย.–7 พ.ย. 2569 · Work Permit และทะเบียนผู้รับเหมาเริ่มบันทึกตั้งแต่ เม.ย. 2569</div></div>'}
+slides[7]={tag:'08 / ผลการใช้งานระบบ 5 เดือน',body:headerTitle('5 เดือน จากแผนสู่ระบบที่ใช้งานจริง','มิ.ย. 2569 เสนอ Safety Web App → วันนี้ใช้งานจริงใน AES & SGE Work Hub')+uatHub()};
 slides[9]={tag:'10 / เป้าหมายปี 2570',body:headerTitle('เป้าหมายความปลอดภัยปี 2570 ที่วัดผลได้','5 เป้าหมาย · มีค่าฐาน มีตัวเลขเป้า และมีแหล่งข้อมูลติดตาม')+uatTargets()};
 slides[10]={tag:'11 / การสนับสนุนที่ต้องการ',body:headerTitle('การสนับสนุนจากผู้บริหาร','สิ่งที่ต้องตัดสินใจเพื่อเปลี่ยนแผนให้เป็นผลลัพธ์')+
 '<div class="uat-layout"><div class="uat-support"><section class="uat-ask"><div class="uat-ask-head"><div class="uat-ask-no">01</div><h3>อนุมัติทรัพยากรตามแผน</h3></div><p>สนับสนุนงบประมาณและเวลาปฏิบัติงานให้กิจกรรม HSE ที่กำหนดไว้เดินหน้าได้ตามรอบ</p><ul class="uat-checks"><li>พิจารณางบรวมตาม EF-27 และ F-SA-14</li><li>จัดลำดับงานเทคนิค งาน PPE และการอบรม</li><li>ติดตามผลด้วยข้อมูลจากระบบกลาง</li></ul></section><section class="uat-ask"><div class="uat-ask-head"><div class="uat-ask-no">02</div><h3>ยืนยันมาตรฐานเดียวกัน</h3></div><p>ให้หัวหน้างานและผู้รับเหมาปฏิบัติตามเกณฑ์ความพร้อมก่อนเริ่มงานอย่างสม่ำเสมอ</p><ul class="uat-checks"><li>กำกับ PPE และ Work Permit</li><li>ปิดประเด็นค้างตามผู้รับผิดชอบ</li><li>ทบทวน KPI ในรอบผู้บริหาร</li></ul></section></div><div class="uat-decision"><div><small>ข้อเสนอเพื่อพิจารณา</small><strong>งบประมาณแผน HSE ปี 2570</strong></div><div><small>SGE · EF-27 · 41 กิจกรรม</small><b>1,283,000</b></div><div><small>AESCON · F-SA-14 · 58 กิจกรรม</small><b>1,340,000</b></div><div class="total"><small>รวม 99 กิจกรรม</small><b>2,623,000 บาท</b><em>สถานะ: รออนุมัติ</em></div></div><div class="uat-note">รายละเอียดกิจกรรมและงบประมาณอยู่ในแผน SGE / AESCON ปี 2570</div></div>'};
