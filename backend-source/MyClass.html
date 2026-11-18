@@ -23,13 +23,16 @@ input{width:100%;padding:12px 13px;border:1px solid #d6def0;border-radius:10px;m
 .err{color:#c0273c;font-size:13px;min-height:18px}
 .card{background:#fff;border:1px solid #e4e9fa;border-radius:16px;padding:18px;margin-bottom:14px}
 .card h3{margin:0 0 10px;font-size:16px}
-.lesson{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #eef1fb;gap:10px}
+.lesson{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #eef1fb;gap:10px;flex-wrap:wrap}
 .lesson:last-child{border-bottom:0}
 .pill{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;background:#edf1ff;color:#3c5de3}
 .pill.done{background:#e4f8ef;color:#0aa88c}
 .hide{display:none!important}
 .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .actions .btn{flex:1}
+.consent{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#4a5a80;margin:10px 0}
+.consent input{width:auto;margin:3px 0 0;min-height:auto}
+.muted{color:#8f9bc0}
 </style>
 </head>
 <body>
@@ -39,10 +42,10 @@ input{width:100%;padding:12px 13px;border:1px solid #d6def0;border-radius:10px;m
   <div class="gate">
     <h2>เข้าห้องเรียนของฉัน</h2>
     <p>กรอกรหัสลงทะเบียน (registrationId จากอีเมล/ใบยืนยัน) และอีเมลหรือเบอร์โทรที่ใช้ลงทะเบียน</p>
-    <input id="rid" placeholder="เช่น SAFE01-0AAF16FA">
-    <input id="contact" placeholder="อีเมลหรือเบอร์โทรที่ใช้ลงทะเบียน">
+    <input id="rid" placeholder="เช่น SAFE01-0AAF16FA" autocomplete="off">
+    <input id="contact" placeholder="อีเมลหรือเบอร์โทรที่ใช้ลงทะเบียน" autocomplete="off">
     <div class="err" id="gateErr"></div>
-    <button class="btn primary" onclick="enter()">เข้าสู่ห้องเรียน</button>
+    <button class="btn primary" id="enterBtn">เข้าสู่ห้องเรียน</button>
   </div>
 </div>
 
@@ -57,9 +60,10 @@ input{width:100%;padding:12px 13px;border:1px solid #d6def0;border-radius:10px;m
   </div>
   <div class="card">
     <h3>ส่งลิงก์ผลงาน</h3>
-    <input id="projectName" placeholder="ชื่อผลงาน">
-    <input id="projectUrl" placeholder="ลิงก์ผลงาน (https://...)">
-    <button class="btn accent" style="width:auto" onclick="submitProject()">📤 ส่งลิงก์ผลงาน</button>
+    <input id="projectName" placeholder="ชื่อผลงาน" autocomplete="off">
+    <input id="projectUrl" placeholder="ลิงก์ผลงาน (https://...)" autocomplete="off">
+    <label class="consent"><input type="checkbox" id="consentPublish"><span>ยินยอมให้นำผลงานนี้ไปแสดงในคลังผลงานสาธารณะของ ภนว | AI Guide (เลือกได้ ไม่บังคับ และสามารถขอถอนความยินยอมได้ภายหลังโดยติดต่อผู้สอน)</span></label>
+    <button class="btn accent" style="width:auto" id="submitBtn">📤 ส่งลิงก์ผลงาน</button>
     <div class="err" id="submitErr"></div>
   </div>
   <div class="card">
@@ -67,7 +71,7 @@ input{width:100%;padding:12px 13px;border:1px solid #d6def0;border-radius:10px;m
     <div id="subsBody">ยังไม่มีผลงานที่ส่ง</div>
   </div>
   <div class="card">
-    <a class="btn outline" style="width:100%" id="feedbackLink" href="#" target="_top">📝 ประเมินผลหลังเรียน</a>
+    <a class="btn outline" style="width:100%" id="feedbackLink" href="#">📝 ประเมินผลหลังเรียน</a>
   </div>
 </div>
 
@@ -76,8 +80,27 @@ input{width:100%;padding:12px 13px;border:1px solid #d6def0;border-radius:10px;m
 "use strict";
 var RID = sessionStorage.getItem('myClassRid') || '';
 var CONTACT = sessionStorage.getItem('myClassContact') || '';
+// Provided by the server template (ScriptApp.getService().getUrl()) — this
+// page can be embedded in a cross-origin iframe (Cloudflare Pages), so the
+// feedback link is built from OUR OWN origin/base URL, never from
+// window.top.location (reading a cross-origin parent's location throws).
+var BASE_URL = <?= JSON.stringify(myClassBaseUrl || '') ?>;
 
-function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function el(tag, attrs, children){
+  var node = document.createElement(tag);
+  attrs = attrs || {};
+  Object.keys(attrs).forEach(function(k){
+    if (k === 'class') node.className = attrs[k];
+    else if (k === 'text') node.textContent = attrs[k];
+    else node.setAttribute(k, attrs[k]);
+  });
+  (children||[]).forEach(function(c){ node.appendChild(c); });
+  return node;
+}
+function isSafeUrl(url){ return /^https:\/\//i.test(url||'') || /^http:\/\/[^\s]+/i.test(url||''); }
+function clear(node){ while(node.firstChild) node.removeChild(node.firstChild); }
+
+if (BASE_URL) document.getElementById('feedbackLink').href = BASE_URL + '?page=feedback';
 
 function enter(){
   RID = document.getElementById('rid').value.trim();
@@ -86,7 +109,7 @@ function enter(){
   if(!RID || !CONTACT){ document.getElementById('gateErr').textContent='กรุณากรอกข้อมูลให้ครบ'; return; }
   load();
 }
-window.enter = enter;
+document.getElementById('enterBtn').addEventListener('click', enter);
 
 function load(){
   google.script.run.withSuccessHandler(function(d){
@@ -96,22 +119,38 @@ function load(){
     document.getElementById('app').classList.remove('hide');
     document.getElementById('courseName').textContent = d.courseName;
     document.getElementById('statusLine').textContent = 'สถานะการลงทะเบียน: ' + d.status;
-    var lessonsHtml = d.lessons.length ? d.lessons.map(function(l){
-      var doneClass = l.status==='DONE' ? 'done' : '';
-      return '<div class="lesson"><div><b>'+esc(l.title)+'</b><br><span class="pill '+doneClass+'">'+esc(l.status)+'</span></div>'+
-        '<div class="actions">'+
-        (l.resourceUrl ? '<a class="btn outline" href="'+esc(l.resourceUrl)+'" target="_blank" rel="noopener">เรียนต่อ</a>' : '') +
-        '<button class="btn accent" onclick="markDone(\''+esc(l.lessonId)+'\')">ทำแล้ว</button>'+
-        '</div></div>';
-    }).join('') : 'ยังไม่มีบทเรียนที่เผยแพร่สำหรับรุ่นนี้';
-    document.getElementById('lessonsBody').innerHTML = lessonsHtml;
-    var subsHtml = d.submissions.length ? d.submissions.map(function(s){
-      return '<div class="lesson"><div><b>'+esc(s.projectName)+'</b><br><span class="pill">'+esc(s.reviewStatus)+'</span>'+(s.reviewerNote?'<br><small>'+esc(s.reviewerNote)+'</small>':'')+'</div>'+
-        '<a class="btn outline" href="'+esc(s.projectUrl)+'" target="_blank" rel="noopener">เปิดผลงาน</a></div>';
-    }).join('') : 'ยังไม่มีผลงานที่ส่ง';
-    document.getElementById('subsBody').innerHTML = subsHtml;
-    document.getElementById('feedbackLink').href = (window.top.location.origin || '') + window.top.location.pathname.replace(/\/exec.*$/,'/exec') + '?page=feedback';
-  }).withFailureHandler(function(err){
+
+    var lessonsBody = document.getElementById('lessonsBody');
+    clear(lessonsBody);
+    if (!d.lessons.length) {
+      lessonsBody.appendChild(el('span',{class:'muted',text:'ยังไม่มีบทเรียนที่เผยแพร่สำหรับรุ่นนี้'}));
+    } else {
+      d.lessons.forEach(function(l){
+        var statusPill = el('span',{class:'pill'+(l.status==='DONE'?' done':''), text:l.status});
+        var info = el('div',{},[el('b',{text:l.title}), el('br'), statusPill]);
+        var actions = el('div',{class:'actions'});
+        if (isSafeUrl(l.resourceUrl)) actions.appendChild(el('a',{class:'btn outline', href:l.resourceUrl, target:'_blank', rel:'noopener noreferrer', text:'เรียนต่อ'}));
+        var doneBtn = el('button',{class:'btn accent', text:'ทำแล้ว'});
+        doneBtn.addEventListener('click', function(){ markDone(l.lessonId); });
+        actions.appendChild(doneBtn);
+        lessonsBody.appendChild(el('div',{class:'lesson'},[info, actions]));
+      });
+    }
+
+    var subsBody = document.getElementById('subsBody');
+    clear(subsBody);
+    if (!d.submissions.length) {
+      subsBody.appendChild(el('span',{class:'muted',text:'ยังไม่มีผลงานที่ส่ง'}));
+    } else {
+      d.submissions.forEach(function(s){
+        var info = el('div',{},[el('b',{text:s.projectName}), el('br'), el('span',{class:'pill',text:s.reviewStatus})]);
+        if (s.reviewerNote) { info.appendChild(el('br')); info.appendChild(el('small',{text:s.reviewerNote})); }
+        var row = el('div',{class:'lesson'},[info]);
+        if (isSafeUrl(s.projectUrl)) row.appendChild(el('a',{class:'btn outline', href:s.projectUrl, target:'_blank', rel:'noopener noreferrer', text:'เปิดผลงาน'}));
+        subsBody.appendChild(row);
+      });
+    }
+  }).withFailureHandler(function(){
     document.getElementById('gateErr').textContent = 'ไม่พบข้อมูลการลงทะเบียน ตรวจสอบรหัสและอีเมล/เบอร์โทรอีกครั้ง';
   }).teachMyClass(RID, CONTACT);
 }
@@ -119,20 +158,23 @@ function load(){
 function markDone(lessonId){
   google.script.run.withSuccessHandler(load).withFailureHandler(function(err){alert('บันทึกไม่สำเร็จ: '+(err&&err.message||err));}).teachMarkLesson(RID, CONTACT, lessonId, 'DONE');
 }
-window.markDone = markDone;
 
-function submitProject(){
+document.getElementById('submitBtn').addEventListener('click', function(){
   document.getElementById('submitErr').textContent='';
-  var input = { projectName: document.getElementById('projectName').value.trim(), projectUrl: document.getElementById('projectUrl').value.trim() };
+  var input = {
+    projectName: document.getElementById('projectName').value.trim(),
+    projectUrl: document.getElementById('projectUrl').value.trim(),
+    permissionToPublish: document.getElementById('consentPublish').checked === true
+  };
   google.script.run.withSuccessHandler(function(){
     document.getElementById('projectName').value='';
     document.getElementById('projectUrl').value='';
+    document.getElementById('consentPublish').checked=false;
     load();
   }).withFailureHandler(function(err){
     document.getElementById('submitErr').textContent = 'ส่งผลงานไม่สำเร็จ: ' + (err && err.message || err);
   }).teachSubmitProject(RID, CONTACT, input);
-}
-window.submitProject = submitProject;
+});
 
 if (RID && CONTACT) load();
 })();

@@ -42,10 +42,18 @@ instructor**, and it takes about 3 minutes:
        .setTitle('แอดมิน | ภนว AI Guide').setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
    }
    if (params.page === 'my-class') {
-     return HtmlService.createTemplateFromFile('MyClass').evaluate()
+     const myClassTemplate = HtmlService.createTemplateFromFile('MyClass');
+     myClassTemplate.myClassBaseUrl = ScriptApp.getService().getUrl();
+     return myClassTemplate.evaluate()
        .setTitle('ห้องเรียนของฉัน | ภนว AI Guide').setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
    }
    ```
+
+   (`myClassBaseUrl` is required — `MyClass.html` uses it to build the
+   "ประเมินผลหลังเรียน" link. It deliberately does NOT read `window.top.location`,
+   because this page is embedded in a cross-origin Cloudflare Pages iframe and
+   reading a cross-origin parent's location throws a `SecurityError` that would
+   silently break the whole page.)
 
 6. Click **Deploy → Manage deployments → the existing active web app
    deployment → Edit (pencil) → New version → Deploy**. This keeps the exact
@@ -67,8 +75,40 @@ iframes those two URLs, the same pattern `/academy/` uses for the existing app.
 New tabs, additive only, already created via the Sheets connector on
 2026-11-18: `LESSONS`, `LEARNER_PROGRESS`, `PROJECT_SUBMISSIONS`,
 `APP_SHOWCASE` — exact headers as specified in
-`docs/AI_GUIDE_TEACHING_SYSTEM_TH.md`. No existing tab, row, or column was
-touched.
+`docs/AI_GUIDE_TEACHING_SYSTEM_TH.md`, plus one additive column
+`PROJECT_SUBMISSIONS.permissionToPublish` (boolean, added 2026-11-18) so a
+learner's publish consent is captured at submission time and never assumed
+later. No existing tab, row, or column was touched.
+
+## Security hardening applied (2026-11-18, before first deploy)
+
+- **Learner identity check** (`teachLearnerIdentify_`): empty/blank
+  registrationId or email/phone is now always rejected outright (previously
+  two blank values could coincidentally "match" if a sheet row had a blank
+  email/phone cell). Repeated failed lookups for the same registrationId are
+  rate-limited (locked for 10 minutes after 8 failures), the same pattern
+  `adminLogin()` already uses against brute-forcing.
+- **Publish consent gate** (`teachApproveShowcase`): an admin can no longer
+  publish a submission to the public showcase unless the learner explicitly
+  checked "ยินยอมให้นำผลงานนี้ไปแสดง…" at submission time
+  (`permissionToPublish === true`, recorded by the learner, never settable by
+  the admin after the fact).
+- **Session-ID collision** (`teachAddCohort`): the next `sessionId` for a
+  course is now computed from the current MAX numeric id for that course, not
+  the row count, so it can never collide after a deleted/reordered row.
+  Capacity is bounds-checked (1–500). A lock + a defensive re-check inside the
+  lock prevents a race from creating two sessions with the same id.
+- **URL validation**: every URL a learner or admin supplies (`projectUrl`,
+  lesson `resourceUrl`, showcase `publicUrl`) is validated server-side
+  (`isSafeHttpUrl_`, http(s) only) before it is stored, in addition to the
+  client-side check. `teachMarkLesson` now also verifies the `lessonId`
+  actually belongs to the caller's own course before writing progress.
+- **XSS**: both `TeachingAdmin.html` and `MyClass.html` were rewritten to
+  build every dynamic table row via `document.createElement`/`textContent`
+  (never `innerHTML` string concatenation), and every rendered link is
+  re-checked against an http(s)-only allow-list before the `<a href>` is
+  created. This removes the injection surface entirely rather than relying on
+  an escaping function to be applied everywhere correctly.
 
 ## What instructors can do once deployed
 
