@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ห้องเรียนของฉัน | ภนว AI Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#111d4b;--blue:#3973ff;--mint:#0aa88c;font-family:'IBM Plex Sans Thai',sans-serif}
+*{box-sizing:border-box}body{margin:0;background:#f3f6ff;color:var(--navy)}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--navy);color:#fff}
+header b{font-weight:800}
+.wrap{max-width:720px;margin:auto;padding:16px}
+.gate{max-width:380px;margin:50px auto;background:#fff;border:1px solid #e4e9fa;border-radius:18px;padding:26px}
+.gate h2{margin:0 0 6px;font-size:19px}
+.gate p{font-size:13px;color:#64749b;margin:0 0 16px}
+input{width:100%;padding:12px 13px;border:1px solid #d6def0;border-radius:10px;margin-bottom:10px;font:inherit;min-height:44px;box-sizing:border-box}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:11px;padding:12px 18px;font-weight:700;cursor:pointer;min-height:44px;font:inherit}
+.btn.primary{background:var(--navy);color:#fff;width:100%}
+.btn.accent{background:var(--mint);color:#fff}
+.btn.outline{background:#fff;border:1px solid #c7d3f2;color:var(--navy)}
+.err{color:#c0273c;font-size:13px;min-height:18px}
+.card{background:#fff;border:1px solid #e4e9fa;border-radius:16px;padding:18px;margin-bottom:14px}
+.card h3{margin:0 0 10px;font-size:16px}
+.lesson{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #eef1fb;gap:10px}
+.lesson:last-child{border-bottom:0}
+.pill{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;background:#edf1ff;color:#3c5de3}
+.pill.done{background:#e4f8ef;color:#0aa88c}
+.hide{display:none!important}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.actions .btn{flex:1}
+</style>
+</head>
+<body>
+<header><b>ภนว | AI Guide · ห้องเรียนของฉัน</b><a href="/" style="color:#9cefe0;text-decoration:none;font-size:12px">หน้าหลัก</a></header>
+
+<div id="gate" class="wrap">
+  <div class="gate">
+    <h2>เข้าห้องเรียนของฉัน</h2>
+    <p>กรอกรหัสลงทะเบียน (registrationId จากอีเมล/ใบยืนยัน) และอีเมลหรือเบอร์โทรที่ใช้ลงทะเบียน</p>
+    <input id="rid" placeholder="เช่น SAFE01-0AAF16FA">
+    <input id="contact" placeholder="อีเมลหรือเบอร์โทรที่ใช้ลงทะเบียน">
+    <div class="err" id="gateErr"></div>
+    <button class="btn primary" onclick="enter()">เข้าสู่ห้องเรียน</button>
+  </div>
+</div>
+
+<div id="app" class="wrap hide">
+  <div class="card">
+    <h3 id="courseName">–</h3>
+    <div id="statusLine" style="font-size:13px;color:#64749b"></div>
+  </div>
+  <div class="card">
+    <h3>บทเรียน</h3>
+    <div id="lessonsBody">กำลังโหลด…</div>
+  </div>
+  <div class="card">
+    <h3>ส่งลิงก์ผลงาน</h3>
+    <input id="projectName" placeholder="ชื่อผลงาน">
+    <input id="projectUrl" placeholder="ลิงก์ผลงาน (https://...)">
+    <button class="btn accent" style="width:auto" onclick="submitProject()">📤 ส่งลิงก์ผลงาน</button>
+    <div class="err" id="submitErr"></div>
+  </div>
+  <div class="card">
+    <h3>ผลงานที่ส่งไปแล้ว</h3>
+    <div id="subsBody">ยังไม่มีผลงานที่ส่ง</div>
+  </div>
+  <div class="card">
+    <a class="btn outline" style="width:100%" id="feedbackLink" href="#" target="_top">📝 ประเมินผลหลังเรียน</a>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var RID = sessionStorage.getItem('myClassRid') || '';
+var CONTACT = sessionStorage.getItem('myClassContact') || '';
+
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function enter(){
+  RID = document.getElementById('rid').value.trim();
+  CONTACT = document.getElementById('contact').value.trim();
+  document.getElementById('gateErr').textContent = '';
+  if(!RID || !CONTACT){ document.getElementById('gateErr').textContent='กรุณากรอกข้อมูลให้ครบ'; return; }
+  load();
+}
+window.enter = enter;
+
+function load(){
+  google.script.run.withSuccessHandler(function(d){
+    sessionStorage.setItem('myClassRid', RID);
+    sessionStorage.setItem('myClassContact', CONTACT);
+    document.getElementById('gate').classList.add('hide');
+    document.getElementById('app').classList.remove('hide');
+    document.getElementById('courseName').textContent = d.courseName;
+    document.getElementById('statusLine').textContent = 'สถานะการลงทะเบียน: ' + d.status;
+    var lessonsHtml = d.lessons.length ? d.lessons.map(function(l){
+      var doneClass = l.status==='DONE' ? 'done' : '';
+      return '<div class="lesson"><div><b>'+esc(l.title)+'</b><br><span class="pill '+doneClass+'">'+esc(l.status)+'</span></div>'+
+        '<div class="actions">'+
+        (l.resourceUrl ? '<a class="btn outline" href="'+esc(l.resourceUrl)+'" target="_blank" rel="noopener">เรียนต่อ</a>' : '') +
+        '<button class="btn accent" onclick="markDone(\''+esc(l.lessonId)+'\')">ทำแล้ว</button>'+
+        '</div></div>';
+    }).join('') : 'ยังไม่มีบทเรียนที่เผยแพร่สำหรับรุ่นนี้';
+    document.getElementById('lessonsBody').innerHTML = lessonsHtml;
+    var subsHtml = d.submissions.length ? d.submissions.map(function(s){
+      return '<div class="lesson"><div><b>'+esc(s.projectName)+'</b><br><span class="pill">'+esc(s.reviewStatus)+'</span>'+(s.reviewerNote?'<br><small>'+esc(s.reviewerNote)+'</small>':'')+'</div>'+
+        '<a class="btn outline" href="'+esc(s.projectUrl)+'" target="_blank" rel="noopener">เปิดผลงาน</a></div>';
+    }).join('') : 'ยังไม่มีผลงานที่ส่ง';
+    document.getElementById('subsBody').innerHTML = subsHtml;
+    document.getElementById('feedbackLink').href = (window.top.location.origin || '') + window.top.location.pathname.replace(/\/exec.*$/,'/exec') + '?page=feedback';
+  }).withFailureHandler(function(err){
+    document.getElementById('gateErr').textContent = 'ไม่พบข้อมูลการลงทะเบียน ตรวจสอบรหัสและอีเมล/เบอร์โทรอีกครั้ง';
+  }).teachMyClass(RID, CONTACT);
+}
+
+function markDone(lessonId){
+  google.script.run.withSuccessHandler(load).withFailureHandler(function(err){alert('บันทึกไม่สำเร็จ: '+(err&&err.message||err));}).teachMarkLesson(RID, CONTACT, lessonId, 'DONE');
+}
+window.markDone = markDone;
+
+function submitProject(){
+  document.getElementById('submitErr').textContent='';
+  var input = { projectName: document.getElementById('projectName').value.trim(), projectUrl: document.getElementById('projectUrl').value.trim() };
+  google.script.run.withSuccessHandler(function(){
+    document.getElementById('projectName').value='';
+    document.getElementById('projectUrl').value='';
+    load();
+  }).withFailureHandler(function(err){
+    document.getElementById('submitErr').textContent = 'ส่งผลงานไม่สำเร็จ: ' + (err && err.message || err);
+  }).teachSubmitProject(RID, CONTACT, input);
+}
+window.submitProject = submitProject;
+
+if (RID && CONTACT) load();
+})();
+</script>
+</body>
+</html>

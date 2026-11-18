@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>แอดมิน | ภนว AI Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#111d4b;--blue:#3973ff;--mint:#0aa88c;--coral:#ff7484;--line:#e4e9fa;--text:#34456f;font-family:'IBM Plex Sans Thai',sans-serif}
+*{box-sizing:border-box}body{margin:0;background:#f3f6ff;color:var(--navy)}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--navy);color:#fff;position:sticky;top:0;z-index:5}
+header b{font-weight:800}
+.wrap{max-width:1080px;margin:auto;padding:16px}
+.gate{max-width:380px;margin:60px auto;background:#fff;border:1px solid var(--line);border-radius:18px;padding:26px;box-shadow:0 10px 30px #1b285512}
+.gate h2{margin:0 0 6px;font-size:20px}
+.gate p{font-size:13px;color:#64749b;margin:0 0 16px}
+.gate input{width:100%;padding:12px 13px;border:1px solid #d6def0;border-radius:10px;margin-bottom:10px;font:inherit;min-height:44px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:11px;padding:12px 18px;font-weight:700;cursor:pointer;min-height:44px;font:inherit}
+.btn.primary{background:var(--navy);color:#fff;width:100%}
+.btn.small{padding:8px 13px;min-height:36px;font-size:13px}
+.err{color:#c0273c;font-size:13px;min-height:18px;margin:4px 0}
+.tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:16px;padding-bottom:2px}
+.tab{padding:10px 14px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;color:#5a6a92;background:#fff;border:1px solid var(--line)}
+.tab.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.metric{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px}
+.metric b{display:block;font-size:28px}
+.metric span{font-size:12px;color:#64749b}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px}
+.card h3{margin:0 0 10px;font-size:16px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
+.pill{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;background:#edf1ff;color:#3c5de3}
+.pill.ok{background:#e4f8ef;color:#0aa88c}.pill.bad{background:#ffeef0;color:#ff5b6d}.pill.warn{background:#fff4e3;color:#c3812a}
+.field{display:block;margin:8px 0}
+.field span{font-size:12px;font-weight:700;display:block;margin-bottom:4px}
+.field input,.field select{width:100%;padding:10px 11px;border:1px solid #d6def0;border-radius:9px;font:inherit;min-height:40px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>*{flex:1;min-width:140px}
+.hide{display:none!important}
+@media(max-width:760px){.metrics{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<header><b>ภนว | AI Guide · แอดมิน</b><a href="/" style="color:#9cefe0;text-decoration:none;font-size:12px">หน้าหลัก</a></header>
+
+<div id="gate" class="gate">
+  <h2>เข้าสู่ระบบผู้สอน</h2>
+  <p>ใช้รหัสผ่านแอดมินเดิมของ Safety Academy (รหัสเดียวกันกับหน้า Admin เดิม)</p>
+  <input type="password" id="secret" placeholder="รหัสผ่านแอดมิน">
+  <div class="err" id="gateErr"></div>
+  <button class="btn primary" onclick="doLogin()">เข้าสู่ระบบ</button>
+</div>
+
+<div id="app" class="wrap hide">
+  <div class="tabs">
+    <div class="tab active" data-tab="overview">ภาพรวม</div>
+    <div class="tab" data-tab="lessons">บทเรียน</div>
+    <div class="tab" data-tab="submissions">ผลงานที่ส่ง</div>
+    <div class="tab" data-tab="showcase">คลังผลงานสาธารณะ</div>
+  </div>
+
+  <section id="tab-overview">
+    <div class="metrics">
+      <div class="metric"><b id="mUpcoming">–</b><span>รุ่นอบรมที่กำลังจะมาถึง</span></div>
+      <div class="metric"><b id="mLearners">–</b><span>ผู้ลงทะเบียนทั้งหมด (สถานะยัง active)</span></div>
+      <div class="metric"><b id="mSubs">–</b><span>ผลงานรอตรวจ</span></div>
+      <div class="metric"><b id="mFeedback">–</b><span>แบบประเมินที่ได้รับ</span></div>
+    </div>
+    <div class="card" id="nextClassCard">
+      <h3>รุ่นอบรมถัดไป</h3>
+      <div id="nextClassBody">กำลังโหลด…</div>
+    </div>
+    <div class="card">
+      <h3>เพิ่มรุ่นอบรม (ไม่สร้างระบบใหม่ — เพิ่ม session ในฐานข้อมูลเดิม)</h3>
+      <div class="row">
+        <label class="field"><span>หลักสูตร (courseCode)</span><select id="cohortCourse"></select></label>
+        <label class="field"><span>วันที่ (YYYY-MM-DD)</span><input id="cohortIso" placeholder="2026-12-20"></label>
+        <label class="field"><span>ป้ายวันที่ (ไทย)</span><input id="cohortLabel" placeholder="20 ธันวาคม 2569"></label>
+      </div>
+      <div class="row">
+        <label class="field"><span>เวลา</span><input id="cohortTime" value="09.00–16.00 น."></label>
+        <label class="field"><span>จำนวนที่นั่ง</span><input id="cohortCap" value="15"></label>
+      </div>
+      <button class="btn primary" style="width:auto" onclick="addCohort()">เพิ่มรุ่นอบรม</button>
+      <div class="err" id="cohortErr"></div>
+    </div>
+    <div class="card">
+      <h3>ผลงานที่ส่งล่าสุด</h3>
+      <table><thead><tr><th>ชื่อผลงาน</th><th>หลักสูตร</th><th>วันที่ส่ง</th><th>สถานะ</th></tr></thead><tbody id="recentSubsBody"><tr><td colspan="4">กำลังโหลด…</td></tr></tbody></table>
+    </div>
+  </section>
+
+  <section id="tab-lessons" class="hide">
+    <div class="card">
+      <h3>เพิ่ม/แก้ไขบทเรียน</h3>
+      <div class="row">
+        <label class="field"><span>หลักสูตร</span><select id="lessonCourse"></select></label>
+        <label class="field"><span>ชื่อบทเรียน</span><input id="lessonTitle"></label>
+      </div>
+      <div class="row">
+        <label class="field"><span>ลำดับ</span><input id="lessonOrder" value="1"></label>
+        <label class="field"><span>ลิงก์เอกสาร/วิดีโอ (Drive)</span><input id="lessonUrl" placeholder="https://drive.google.com/..."></label>
+      </div>
+      <button class="btn primary" style="width:auto" onclick="saveLesson()">บันทึกบทเรียน</button>
+      <div class="err" id="lessonErr"></div>
+    </div>
+    <div class="card">
+      <h3>รายการบทเรียน</h3>
+      <table><thead><tr><th>หลักสูตร</th><th>ชื่อบทเรียน</th><th>ลำดับ</th><th>สถานะ</th></tr></thead><tbody id="lessonsBody"><tr><td colspan="4">กำลังโหลด…</td></tr></tbody></table>
+    </div>
+  </section>
+
+  <section id="tab-submissions" class="hide">
+    <div class="card">
+      <h3>ผลงานที่ต้องตรวจ</h3>
+      <table><thead><tr><th>ผู้เรียน</th><th>ผลงาน</th><th>ลิงก์</th><th>สถานะ</th><th>การตรวจ</th></tr></thead><tbody id="subsBody"><tr><td colspan="5">กำลังโหลด…</td></tr></tbody></table>
+    </div>
+  </section>
+
+  <section id="tab-showcase" class="hide">
+    <div class="card">
+      <h3>ผลงานที่อนุมัติแล้ว รอเผยแพร่</h3>
+      <table><thead><tr><th>ผลงาน</th><th>ลิงก์</th><th>เผยแพร่</th></tr></thead><tbody id="candidatesBody"><tr><td colspan="3">กำลังโหลด…</td></tr></tbody></table>
+    </div>
+    <div class="card">
+      <h3>คลังผลงานสาธารณะปัจจุบัน</h3>
+      <table><thead><tr><th>ชื่อ</th><th>คำอธิบาย</th><th>ลิงก์</th></tr></thead><tbody id="showcaseBody"><tr><td colspan="3">กำลังโหลด…</td></tr></tbody></table>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+"use strict";
+var TOKEN = sessionStorage.getItem('teachAdminToken') || '';
+
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function doLogin(){
+  var secret = document.getElementById('secret').value;
+  document.getElementById('gateErr').textContent = '';
+  google.script.run.withSuccessHandler(function(res){
+    TOKEN = res.token;
+    sessionStorage.setItem('teachAdminToken', TOKEN);
+    showApp();
+  }).withFailureHandler(function(err){
+    document.getElementById('gateErr').textContent = 'เข้าสู่ระบบไม่สำเร็จ: ' + (err && err.message || err);
+  }).adminLogin(secret, false);
+}
+window.doLogin = doLogin;
+
+function showApp(){
+  document.getElementById('gate').classList.add('hide');
+  document.getElementById('app').classList.remove('hide');
+  loadOverview();
+  loadCourseOptions();
+}
+
+document.querySelectorAll('.tab').forEach(function(t){
+  t.addEventListener('click', function(){
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});
+    t.classList.add('active');
+    ['overview','lessons','submissions','showcase'].forEach(function(name){
+      document.getElementById('tab-'+name).classList.toggle('hide', name!==t.dataset.tab);
+    });
+    if (t.dataset.tab==='lessons') loadLessons();
+    if (t.dataset.tab==='submissions') loadSubmissions();
+    if (t.dataset.tab==='showcase') loadShowcase();
+  });
+});
+
+function loadOverview(){
+  google.script.run.withSuccessHandler(function(d){
+    document.getElementById('mUpcoming').textContent = d.upcomingClassesCount;
+    document.getElementById('mLearners').textContent = d.registeredLearnersCount;
+    document.getElementById('mSubs').textContent = d.submissionsAwaitingReviewCount;
+    document.getElementById('mFeedback').textContent = d.feedbackCount;
+    var nc = d.nextClass;
+    document.getElementById('nextClassBody').innerHTML = nc
+      ? ('<b>'+esc(nc.courseName)+'</b> ('+esc(nc.courseCode)+')<br>'+esc(nc.date)+' · '+esc(nc.time)+'<br>ลงทะเบียนแล้ว '+nc.registered+' / '+nc.capacity+' ที่นั่ง')
+      : 'ยังไม่มีรุ่นอบรมที่กำลังจะมาถึงในระบบ';
+    var rows = d.recentSubmissions.map(function(s){
+      return '<tr><td>'+esc(s.projectName)+'</td><td>'+esc(s.courseCode)+'</td><td>'+esc(s.submittedAt)+'</td><td><span class="pill">'+esc(s.reviewStatus)+'</span></td></tr>';
+    }).join('');
+    document.getElementById('recentSubsBody').innerHTML = rows || '<tr><td colspan="4">ยังไม่มีผลงานส่งเข้ามา</td></tr>';
+  }).withFailureHandler(onAuthError).teachOverview(TOKEN);
+}
+
+function loadCourseOptions(){
+  google.script.run.withSuccessHandler(function(list){
+    var opts = list.map(function(c){return '<option value="'+esc(c.courseCode)+'">'+esc(c.courseCode)+' · '+esc(c.courseName)+'</option>'}).join('');
+    document.getElementById('cohortCourse').innerHTML = opts;
+    document.getElementById('lessonCourse').innerHTML = opts;
+  }).withFailureHandler(onAuthError).teachListCourses(TOKEN);
+}
+
+function addCohort(){
+  document.getElementById('cohortErr').textContent = '';
+  var input = {
+    courseCode: document.getElementById('cohortCourse').value,
+    isoDate: document.getElementById('cohortIso').value.trim(),
+    dateLabel: document.getElementById('cohortLabel').value.trim(),
+    time: document.getElementById('cohortTime').value.trim(),
+    capacity: document.getElementById('cohortCap').value.trim()
+  };
+  google.script.run.withSuccessHandler(function(){
+    document.getElementById('cohortIso').value='';
+    document.getElementById('cohortLabel').value='';
+    loadOverview();
+  }).withFailureHandler(function(err){
+    document.getElementById('cohortErr').textContent = 'เพิ่มรุ่นอบรมไม่สำเร็จ: ' + (err && err.message || err);
+  }).teachAddCohort(TOKEN, input);
+}
+window.addCohort = addCohort;
+
+function loadLessons(){
+  google.script.run.withSuccessHandler(function(list){
+    var rows = list.map(function(l){
+      return '<tr><td>'+esc(l.courseCode)+'</td><td>'+esc(l.title)+'</td><td>'+esc(l.ordering)+'</td><td>'+esc(l.status)+'</td></tr>';
+    }).join('');
+    document.getElementById('lessonsBody').innerHTML = rows || '<tr><td colspan="4">ยังไม่มีบทเรียน</td></tr>';
+  }).withFailureHandler(onAuthError).teachListLessons(TOKEN, '');
+}
+
+function saveLesson(){
+  document.getElementById('lessonErr').textContent = '';
+  var input = {
+    courseCode: document.getElementById('lessonCourse').value,
+    title: document.getElementById('lessonTitle').value.trim(),
+    ordering: document.getElementById('lessonOrder').value.trim(),
+    resourceUrl: document.getElementById('lessonUrl').value.trim()
+  };
+  google.script.run.withSuccessHandler(function(){
+    document.getElementById('lessonTitle').value='';
+    document.getElementById('lessonUrl').value='';
+    loadLessons();
+  }).withFailureHandler(function(err){
+    document.getElementById('lessonErr').textContent = 'บันทึกไม่สำเร็จ: ' + (err && err.message || err);
+  }).teachSaveLesson(TOKEN, input);
+}
+window.saveLesson = saveLesson;
+
+function loadSubmissions(){
+  google.script.run.withSuccessHandler(function(list){
+    var rows = list.map(function(s){
+      return '<tr><td>'+esc(s.learnerName)+'</td><td>'+esc(s.projectName)+'</td><td><a href="'+esc(s.projectUrl)+'" target="_blank" rel="noopener">เปิดลิงก์</a></td><td><span class="pill">'+esc(s.reviewStatus)+'</span></td>'+
+        '<td><button class="btn small" onclick="review(\''+esc(s.submissionId)+'\',\'APPROVED\')">✅ อนุมัติ</button> '+
+        '<button class="btn small" onclick="review(\''+esc(s.submissionId)+'\',\'NEEDS_REVISION\')">✏️ ขอแก้ไข</button> '+
+        '<button class="btn small" onclick="review(\''+esc(s.submissionId)+'\',\'REJECTED\')">❌ ไม่ผ่าน</button></td></tr>';
+    }).join('');
+    document.getElementById('subsBody').innerHTML = rows || '<tr><td colspan="5">ยังไม่มีผลงานส่งเข้ามา</td></tr>';
+  }).withFailureHandler(onAuthError).teachListSubmissions(TOKEN, '');
+}
+
+function review(id, status){
+  var note = status==='NEEDS_REVISION' ? (prompt('หมายเหตุถึงผู้เรียน (ถ้ามี):')||'') : '';
+  google.script.run.withSuccessHandler(loadSubmissions).withFailureHandler(onAuthError).teachReviewSubmission(TOKEN, id, status, note);
+}
+window.review = review;
+
+function loadShowcase(){
+  google.script.run.withSuccessHandler(function(list){
+    var rows = list.map(function(s){
+      return '<tr><td>'+esc(s.projectName)+'</td><td><a href="'+esc(s.projectUrl)+'" target="_blank" rel="noopener">เปิดลิงก์</a></td>'+
+        '<td><button class="btn small" onclick="approveShowcase(\''+esc(s.submissionId)+'\')">เผยแพร่</button></td></tr>';
+    }).join('');
+    document.getElementById('candidatesBody').innerHTML = rows || '<tr><td colspan="3">ยังไม่มีผลงานที่อนุมัติรอเผยแพร่</td></tr>';
+  }).withFailureHandler(onAuthError).teachListShowcaseCandidates(TOKEN);
+  google.script.run.withSuccessHandler(function(list){
+    var rows = list.map(function(a){
+      return '<tr><td>'+esc(a.title)+'</td><td>'+esc(a.description)+'</td><td><a href="'+esc(a.publicUrl)+'" target="_blank" rel="noopener">เปิดลิงก์</a></td></tr>';
+    }).join('');
+    document.getElementById('showcaseBody').innerHTML = rows || '<tr><td colspan="3">ยังไม่มีผลงานในคลังสาธารณะ</td></tr>';
+  }).withFailureHandler(onAuthError).teachListShowcaseAdmin(TOKEN);
+}
+
+function approveShowcase(submissionId){
+  var title = prompt('ชื่อผลงานที่จะแสดงต่อสาธารณะ:') || '';
+  if(!title) return;
+  var description = prompt('คำอธิบายสั้น ๆ:') || '';
+  google.script.run.withSuccessHandler(loadShowcase).withFailureHandler(onAuthError).teachApproveShowcase(TOKEN, submissionId, title, description, '');
+}
+window.approveShowcase = approveShowcase;
+
+function onAuthError(err){
+  var msg = String(err && err.message || err || '');
+  if (msg.indexOf('ADMIN_AUTH_REQUIRED') >= 0) {
+    sessionStorage.removeItem('teachAdminToken');
+    document.getElementById('app').classList.add('hide');
+    document.getElementById('gate').classList.remove('hide');
+    document.getElementById('gateErr').textContent = 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่';
+  } else {
+    alert('เกิดข้อผิดพลาด: ' + msg);
+  }
+}
+
+if (TOKEN) showApp();
+})();
+</script>
+</body>
+</html>
