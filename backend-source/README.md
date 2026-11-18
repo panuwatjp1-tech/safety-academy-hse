@@ -1,4 +1,13 @@
-# Teaching Hub backend additions (ภนว | AI Guide)
+> **SUPERSEDED (2026-11-18).** The instructor decided the teaching system
+> will no longer be built on Google Apps Script going forward. The files in
+> this folder were never pasted into Apps Script and never will be — kept
+> here only as a historical record of the approach that was designed and
+> hardened before the pivot. The live implementation is now Cloudflare
+> Pages Functions + D1; see `/docs/CLOUD_NATIVE_MIGRATION.md` and
+> `/functions/`. `/academy/`, `/executive/` and the Apps Script backend
+> behind them are untouched and keep running as-is.
+
+# Teaching Hub backend additions (ภนว | AI Guide) — historical, not deployed
 
 These three files are **pure additions** to the existing, live Apps Script project
 "SAFETY APP ACADEMY FIRE-01 Production V1" (the same project behind `/academy/`,

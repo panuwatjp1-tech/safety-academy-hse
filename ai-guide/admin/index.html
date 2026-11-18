@@ -1,1 +1,328 @@
-<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>แอดมิน | ภนว AI Guide</title><style>html,body{margin:0;background:#07111e;color:#eaf7ff;font-family:Arial,sans-serif}header{height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid #26445a;background:#091a2b}a{color:#9cefe0;text-decoration:none;font-weight:700}iframe{display:block;width:100%;height:calc(100vh - 58px);min-height:760px;border:0}</style></head><body><header><a href="/ai-guide/">← AI Guide</a><a href="https://script.google.com/macros/s/AKfycbwrkoVRqjl1r6C_Q1SYA9hHX_nuyxrfdlftoBDCFqZg_23kUG8fQv3i4P4UojuTNlZv/exec?page=ai-guide-admin" target="_blank" rel="noopener">เปิดเต็มหน้า ↗</a></header><iframe title="แอดมินผู้สอน" src="https://script.google.com/macros/s/AKfycbwrkoVRqjl1r6C_Q1SYA9hHX_nuyxrfdlftoBDCFqZg_23kUG8fQv3i4P4UojuTNlZv/exec?page=ai-guide-admin"></iframe></body></html>
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>แอดมิน | ภนว AI Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#111d4b;--blue:#3973ff;--mint:#0aa88c;--coral:#ff7484;--line:#e4e9fa;--text:#34456f;font-family:'IBM Plex Sans Thai',sans-serif}
+*{box-sizing:border-box}body{margin:0;background:#f3f6ff;color:var(--navy)}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--navy);color:#fff;position:sticky;top:0;z-index:5}
+header b{font-weight:800}
+header a{color:#9cefe0;text-decoration:none;font-size:12px}
+.wrap{max-width:1080px;margin:auto;padding:16px}
+.gate{max-width:380px;margin:60px auto;background:#fff;border:1px solid var(--line);border-radius:18px;padding:26px;box-shadow:0 10px 30px #1b285512}
+.gate h2{margin:0 0 6px;font-size:20px}
+.gate p{font-size:13px;color:#64749b;margin:0 0 16px}
+.gate input{width:100%;padding:12px 13px;border:1px solid #d6def0;border-radius:10px;margin-bottom:10px;font:inherit;min-height:44px;box-sizing:border-box}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:11px;padding:12px 18px;font-weight:700;cursor:pointer;min-height:44px;font:inherit}
+.btn.primary{background:var(--navy);color:#fff;width:100%}
+.btn.small{padding:8px 13px;min-height:36px;font-size:13px;margin:2px}
+.err{color:#c0273c;font-size:13px;min-height:18px;margin:4px 0}
+.tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:16px;padding-bottom:2px}
+.tab{padding:10px 14px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;color:#5a6a92;background:#fff;border:1px solid var(--line)}
+.tab.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.metric{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px}
+.metric b{display:block;font-size:28px}
+.metric span{font-size:12px;color:#64749b}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px}
+.card h3{margin:0 0 10px;font-size:16px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+.pill{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;background:#edf1ff;color:#3c5de3}
+.pill.ok{background:#e4f8ef;color:#0aa88c}.pill.bad{background:#ffeef0;color:#ff5b6d}
+.field{display:block;margin:8px 0}
+.field span{font-size:12px;font-weight:700;display:block;margin-bottom:4px}
+.field input,.field select{width:100%;padding:10px 11px;border:1px solid #d6def0;border-radius:9px;font:inherit;min-height:40px;box-sizing:border-box}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>*{flex:1;min-width:140px}
+.hide{display:none!important}
+.muted{color:#8f9bc0}
+.note{font-size:12px;color:#8299c9;margin-top:6px}
+@media(max-width:760px){.metrics{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<header><b>ภนว | AI Guide · แอดมิน</b><a href="/">หน้าหลัก</a></header>
+
+<div id="gate" class="gate">
+  <h2>เข้าสู่ระบบผู้สอน</h2>
+  <p>ระบบใหม่บน Cloudflare (Workers + D1) — ใช้รหัสผ่านแอดมินที่ตั้งไว้สำหรับระบบนี้</p>
+  <input type="password" id="secret" placeholder="รหัสผ่านแอดมิน" autocomplete="off">
+  <div class="err" id="gateErr"></div>
+  <button class="btn primary" id="loginBtn">เข้าสู่ระบบ</button>
+</div>
+
+<div id="app" class="wrap hide">
+  <div class="tabs">
+    <div class="tab active" data-tab="overview">ภาพรวม</div>
+    <div class="tab" data-tab="lessons">บทเรียน</div>
+    <div class="tab" data-tab="submissions">ผลงานที่ส่ง</div>
+    <div class="tab" data-tab="showcase">คลังผลงานสาธารณะ</div>
+  </div>
+
+  <section id="tab-overview">
+    <div class="metrics">
+      <div class="metric"><b id="mUpcoming">–</b><span>รุ่นอบรมที่กำลังจะมาถึง</span></div>
+      <div class="metric"><b id="mLearners">–</b><span>ผู้ลงทะเบียนทั้งหมด (สถานะยัง active)</span></div>
+      <div class="metric"><b id="mSubs">–</b><span>ผลงานรอตรวจ</span></div>
+      <div class="metric"><b id="mFeedback">–</b><span>แบบประเมินที่ได้รับ</span></div>
+    </div>
+    <div class="card"><h3>รุ่นอบรมถัดไป</h3><div id="nextClassBody">กำลังโหลด…</div></div>
+    <div class="card">
+      <h3>เพิ่มรุ่นอบรม</h3>
+      <div class="row">
+        <label class="field"><span>หลักสูตร (courseCode)</span><select id="cohortCourse"></select></label>
+        <label class="field"><span>วันที่ (YYYY-MM-DD)</span><input id="cohortIso" placeholder="2026-12-20"></label>
+        <label class="field"><span>ป้ายวันที่ (ไทย)</span><input id="cohortLabel" placeholder="20 ธันวาคม 2569"></label>
+      </div>
+      <div class="row">
+        <label class="field"><span>เวลา</span><input id="cohortTime" value="09.00–16.00 น."></label>
+        <label class="field"><span>จำนวนที่นั่ง</span><input id="cohortCap" value="15"></label>
+      </div>
+      <button class="btn primary" style="width:auto" id="addCohortBtn">เพิ่มรุ่นอบรม</button>
+      <div class="err" id="cohortErr"></div>
+    </div>
+    <div class="card"><h3>ผลงานที่ส่งล่าสุด</h3><table><thead><tr><th>ชื่อผลงาน</th><th>หลักสูตร</th><th>วันที่ส่ง</th><th>สถานะ</th></tr></thead><tbody id="recentSubsBody"></tbody></table></div>
+  </section>
+
+  <section id="tab-lessons" class="hide">
+    <div class="card">
+      <h3>เพิ่ม/แก้ไขบทเรียน</h3>
+      <div class="row">
+        <label class="field"><span>หลักสูตร</span><select id="lessonCourse"></select></label>
+        <label class="field"><span>ชื่อบทเรียน</span><input id="lessonTitle"></label>
+      </div>
+      <div class="row">
+        <label class="field"><span>ลำดับ</span><input id="lessonOrder" value="1"></label>
+        <label class="field"><span>ลิงก์เอกสาร/วิดีโอ (ต้องเป็น https://)</span><input id="lessonUrl" placeholder="https://drive.google.com/..."></label>
+      </div>
+      <button class="btn primary" style="width:auto" id="saveLessonBtn">บันทึกบทเรียน</button>
+      <div class="err" id="lessonErr"></div>
+    </div>
+    <div class="card"><h3>รายการบทเรียน</h3><table><thead><tr><th>หลักสูตร</th><th>ชื่อบทเรียน</th><th>ลำดับ</th><th>สถานะ</th></tr></thead><tbody id="lessonsBody"></tbody></table></div>
+  </section>
+
+  <section id="tab-submissions" class="hide">
+    <div class="card"><h3>ผลงานที่ต้องตรวจ</h3><table><thead><tr><th>ผู้เรียน</th><th>ผลงาน</th><th>ลิงก์</th><th>ยินยอมเผยแพร่</th><th>สถานะ</th><th>การตรวจ</th></tr></thead><tbody id="subsBody"></tbody></table></div>
+  </section>
+
+  <section id="tab-showcase" class="hide">
+    <div class="card"><h3>ผลงานที่อนุมัติและผู้เรียนยินยอมเผยแพร่</h3><table><thead><tr><th>ผลงาน</th><th>ลิงก์</th><th>เผยแพร่</th></tr></thead><tbody id="candidatesBody"></tbody></table></div>
+    <div class="card"><h3>คลังผลงานสาธารณะปัจจุบัน</h3><table><thead><tr><th>ชื่อ</th><th>คำอธิบาย</th><th>ลิงก์</th></tr></thead><tbody id="showcaseBody"></tbody></table></div>
+  </section>
+</div>
+
+<script>
+(function(){
+"use strict";
+var TOKEN = sessionStorage.getItem('aiGuideAdminToken') || '';
+
+function el(tag, attrs, children){
+  var node = document.createElement(tag);
+  attrs = attrs || {};
+  Object.keys(attrs).forEach(function(k){
+    if (k === 'class') node.className = attrs[k];
+    else if (k === 'text') node.textContent = attrs[k];
+    else node.setAttribute(k, attrs[k]);
+  });
+  (children||[]).forEach(function(c){ node.appendChild(c); });
+  return node;
+}
+function td(text){ return el('td', {text: text==null?'':String(text)}); }
+function pill(text){ return el('span',{class:'pill',text:text}); }
+function isSafeUrl(url){ return /^https:\/\//i.test(url||'') || /^http:\/\/[^\s]+/i.test(url||''); }
+function linkCell(url, label){
+  var cell = el('td', {});
+  if (isSafeUrl(url)) cell.appendChild(el('a', {href:url, target:'_blank', rel:'noopener noreferrer', text: label || 'เปิดลิงก์'}));
+  else cell.appendChild(el('span', {class:'muted', text: 'ลิงก์ไม่ถูกต้อง'}));
+  return cell;
+}
+function button(label, handler){ var b = el('button', {class:'btn small', text: label}); b.addEventListener('click', handler); return b; }
+function clear(node){ while(node.firstChild) node.removeChild(node.firstChild); }
+function setRows(tbodyId, rows, emptyText, buildRow){
+  var tbody = document.getElementById(tbodyId); clear(tbody);
+  if (!rows.length) { tbody.appendChild(el('tr',{},[el('td',{colspan:'6', class:'muted', text: emptyText})])); return; }
+  rows.forEach(function(row){ tbody.appendChild(buildRow(row)); });
+}
+
+async function api(path, opts){
+  opts = opts || {};
+  var res = await fetch('/api/' + path, {
+    method: opts.method || 'GET',
+    headers: opts.body ? {'content-type':'application/json'} : undefined,
+    body: opts.body ? JSON.stringify(opts.body) : undefined
+  });
+  var data = await res.json().catch(function(){ return {}; });
+  if (!res.ok || data.ok === false) {
+    var e = new Error(data.error || ('HTTP_'+res.status)); e.status = res.status; throw e;
+  }
+  return data;
+}
+
+async function doLogin(){
+  var secret = document.getElementById('secret').value;
+  document.getElementById('gateErr').textContent = '';
+  try {
+    var res = await api('admin/login', {method:'POST', body:{secret: secret}});
+    TOKEN = res.token;
+    sessionStorage.setItem('aiGuideAdminToken', TOKEN);
+    document.getElementById('secret').value = '';
+    showApp();
+  } catch (e) {
+    document.getElementById('gateErr').textContent = 'เข้าสู่ระบบไม่สำเร็จ: ' + e.message;
+  }
+}
+document.getElementById('loginBtn').addEventListener('click', doLogin);
+document.getElementById('secret').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+
+function showApp(){
+  document.getElementById('gate').classList.add('hide');
+  document.getElementById('app').classList.remove('hide');
+  loadOverview(); loadCourseOptions();
+}
+
+document.querySelectorAll('.tab').forEach(function(t){
+  t.addEventListener('click', function(){
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});
+    t.classList.add('active');
+    ['overview','lessons','submissions','showcase'].forEach(function(name){
+      document.getElementById('tab-'+name).classList.toggle('hide', name!==t.dataset.tab);
+    });
+    if (t.dataset.tab==='lessons') loadLessons();
+    if (t.dataset.tab==='submissions') loadSubmissions();
+    if (t.dataset.tab==='showcase') loadShowcase();
+  });
+});
+
+async function loadOverview(){
+  try {
+    var d = await api('admin/overview?token=' + encodeURIComponent(TOKEN));
+    document.getElementById('mUpcoming').textContent = d.upcomingClassesCount;
+    document.getElementById('mLearners').textContent = d.registeredLearnersCount;
+    document.getElementById('mSubs').textContent = d.submissionsAwaitingReviewCount;
+    document.getElementById('mFeedback').textContent = d.feedbackCount;
+    var nc = d.nextClass, body = document.getElementById('nextClassBody'); clear(body);
+    if (nc) {
+      body.appendChild(el('b', {text: nc.courseName + ' (' + nc.courseCode + ')'}));
+      body.appendChild(el('br'));
+      body.appendChild(document.createTextNode(nc.date + ' · ' + nc.time));
+      body.appendChild(el('br'));
+      body.appendChild(document.createTextNode('ลงทะเบียนแล้ว ' + nc.registered + ' / ' + nc.capacity + ' ที่นั่ง'));
+    } else {
+      body.appendChild(el('span',{class:'muted', text:'ยังไม่มีรุ่นอบรมที่กำลังจะมาถึงในระบบ'}));
+    }
+    setRows('recentSubsBody', d.recentSubmissions, 'ยังไม่มีผลงานส่งเข้ามา', function(s){
+      return el('tr',{},[td(s.projectName), td(s.courseCode), td(s.submittedAt), el('td',{},[pill(s.reviewStatus)])]);
+    });
+  } catch (e) { onApiError(e); }
+}
+
+async function loadCourseOptions(){
+  try {
+    var list = await api('admin/courses?token=' + encodeURIComponent(TOKEN));
+    [['cohortCourse'],['lessonCourse']].forEach(function(pair){
+      var sel = document.getElementById(pair[0]); clear(sel);
+      list.forEach(function(c){ sel.appendChild(el('option',{value:c.courseCode, text: c.courseCode + ' · ' + c.courseName})); });
+    });
+  } catch (e) { onApiError(e); }
+}
+
+document.getElementById('addCohortBtn').addEventListener('click', async function(){
+  document.getElementById('cohortErr').textContent = '';
+  try {
+    await api('admin/cohort', {method:'POST', body:{
+      token: TOKEN,
+      courseCode: document.getElementById('cohortCourse').value,
+      isoDate: document.getElementById('cohortIso').value.trim(),
+      dateLabel: document.getElementById('cohortLabel').value.trim(),
+      time: document.getElementById('cohortTime').value.trim(),
+      capacity: document.getElementById('cohortCap').value.trim()
+    }});
+    document.getElementById('cohortIso').value=''; document.getElementById('cohortLabel').value='';
+    loadOverview();
+  } catch (e) { document.getElementById('cohortErr').textContent = 'เพิ่มรุ่นอบรมไม่สำเร็จ: ' + e.message; }
+});
+
+async function loadLessons(){
+  try {
+    var list = await api('admin/lessons?token=' + encodeURIComponent(TOKEN));
+    setRows('lessonsBody', list, 'ยังไม่มีบทเรียน', function(l){ return el('tr',{},[td(l.courseCode), td(l.title), td(l.ordering), td(l.status)]); });
+  } catch (e) { onApiError(e); }
+}
+
+document.getElementById('saveLessonBtn').addEventListener('click', async function(){
+  document.getElementById('lessonErr').textContent = '';
+  try {
+    await api('admin/lessons', {method:'POST', body:{
+      token: TOKEN,
+      courseCode: document.getElementById('lessonCourse').value,
+      title: document.getElementById('lessonTitle').value.trim(),
+      ordering: document.getElementById('lessonOrder').value.trim(),
+      resourceUrl: document.getElementById('lessonUrl').value.trim()
+    }});
+    document.getElementById('lessonTitle').value=''; document.getElementById('lessonUrl').value='';
+    loadLessons();
+  } catch (e) { document.getElementById('lessonErr').textContent = 'บันทึกไม่สำเร็จ: ' + e.message; }
+});
+
+async function loadSubmissions(){
+  try {
+    var list = await api('admin/submissions?token=' + encodeURIComponent(TOKEN));
+    setRows('subsBody', list, 'ยังไม่มีผลงานส่งเข้ามา', function(s){
+      var consentPill = pill(s.permissionToPublish ? 'ยินยอม' : 'ไม่ยินยอม');
+      consentPill.className += s.permissionToPublish ? ' ok' : ' bad';
+      var actions = el('td',{},[
+        button('✅ อนุมัติ', function(){ review(s.submissionId,'APPROVED'); }),
+        button('✏️ ขอแก้ไข', function(){ review(s.submissionId,'NEEDS_REVISION'); }),
+        button('❌ ไม่ผ่าน', function(){ review(s.submissionId,'REJECTED'); })
+      ]);
+      return el('tr',{},[td(s.learnerName), td(s.projectName), linkCell(s.projectUrl), el('td',{},[consentPill]), el('td',{},[pill(s.reviewStatus)]), actions]);
+    });
+  } catch (e) { onApiError(e); }
+}
+
+async function review(id, status){
+  var note = status==='NEEDS_REVISION' ? (prompt('หมายเหตุถึงผู้เรียน (ถ้ามี):')||'') : '';
+  try { await api('admin/submissions/review', {method:'POST', body:{token:TOKEN, submissionId:id, reviewStatus:status, reviewerNote:note}}); loadSubmissions(); }
+  catch (e) { onApiError(e); }
+}
+
+async function loadShowcase(){
+  try {
+    var candidates = await api('admin/showcase/candidates?token=' + encodeURIComponent(TOKEN));
+    setRows('candidatesBody', candidates, 'ยังไม่มีผลงานที่อนุมัติและผู้เรียนยินยอมเผยแพร่', function(s){
+      return el('tr',{},[td(s.projectName), linkCell(s.projectUrl), el('td',{},[button('เผยแพร่', function(){ approveShowcase(s.submissionId); })])]);
+    });
+    var showcase = await api('admin/showcase?token=' + encodeURIComponent(TOKEN));
+    setRows('showcaseBody', showcase, 'ยังไม่มีผลงานในคลังสาธารณะ', function(a){ return el('tr',{},[td(a.title), td(a.description), linkCell(a.publicUrl)]); });
+  } catch (e) { onApiError(e); }
+}
+
+async function approveShowcase(submissionId){
+  var title = prompt('ชื่อผลงานที่จะแสดงต่อสาธารณะ:') || '';
+  if(!title) return;
+  var description = prompt('คำอธิบายสั้น ๆ:') || '';
+  try { await api('admin/showcase/approve', {method:'POST', body:{token:TOKEN, submissionId:submissionId, title:title, description:description}}); loadShowcase(); }
+  catch (e) { alert('เผยแพร่ไม่สำเร็จ: ' + e.message); }
+}
+
+function onApiError(e){
+  if (e.status === 401) {
+    sessionStorage.removeItem('aiGuideAdminToken');
+    document.getElementById('app').classList.add('hide');
+    document.getElementById('gate').classList.remove('hide');
+    document.getElementById('gateErr').textContent = 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่';
+  } else {
+    alert('เกิดข้อผิดพลาด: ' + e.message);
+  }
+}
+
+if (TOKEN) showApp();
+})();
+</script>
+</body>
+</html>

@@ -1,1 +1,175 @@
-<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ห้องเรียนของฉัน | ภนว AI Guide</title><style>html,body{margin:0;background:#07111e;color:#eaf7ff;font-family:Arial,sans-serif}header{height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid #26445a;background:#091a2b}a{color:#9cefe0;text-decoration:none;font-weight:700}iframe{display:block;width:100%;height:calc(100vh - 58px);min-height:760px;border:0}</style></head><body><header><a href="/ai-guide/">← AI Guide</a><a href="https://script.google.com/macros/s/AKfycbwrkoVRqjl1r6C_Q1SYA9hHX_nuyxrfdlftoBDCFqZg_23kUG8fQv3i4P4UojuTNlZv/exec?page=my-class" target="_blank" rel="noopener">เปิดเต็มหน้า ↗</a></header><iframe title="ห้องเรียนของฉัน" src="https://script.google.com/macros/s/AKfycbwrkoVRqjl1r6C_Q1SYA9hHX_nuyxrfdlftoBDCFqZg_23kUG8fQv3i4P4UojuTNlZv/exec?page=my-class"></iframe></body></html>
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ห้องเรียนของฉัน | ภนว AI Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#111d4b;--blue:#3973ff;--mint:#0aa88c;font-family:'IBM Plex Sans Thai',sans-serif}
+*{box-sizing:border-box}body{margin:0;background:#f3f6ff;color:var(--navy)}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--navy);color:#fff}
+header b{font-weight:800}
+header a{color:#9cefe0;text-decoration:none;font-size:12px}
+.wrap{max-width:720px;margin:auto;padding:16px}
+.gate{max-width:380px;margin:50px auto;background:#fff;border:1px solid #e4e9fa;border-radius:18px;padding:26px}
+.gate h2{margin:0 0 6px;font-size:19px}
+.gate p{font-size:13px;color:#64749b;margin:0 0 16px}
+input{width:100%;padding:12px 13px;border:1px solid #d6def0;border-radius:10px;margin-bottom:10px;font:inherit;min-height:44px;box-sizing:border-box}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:11px;padding:12px 18px;font-weight:700;cursor:pointer;min-height:44px;font:inherit}
+.btn.primary{background:var(--navy);color:#fff;width:100%}
+.btn.accent{background:var(--mint);color:#fff}
+.btn.outline{background:#fff;border:1px solid #c7d3f2;color:var(--navy)}
+.err{color:#c0273c;font-size:13px;min-height:18px}
+.card{background:#fff;border:1px solid #e4e9fa;border-radius:16px;padding:18px;margin-bottom:14px}
+.card h3{margin:0 0 10px;font-size:16px}
+.lesson{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #eef1fb;gap:10px;flex-wrap:wrap}
+.lesson:last-child{border-bottom:0}
+.pill{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;background:#edf1ff;color:#3c5de3}
+.pill.done{background:#e4f8ef;color:#0aa88c}
+.hide{display:none!important}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.actions .btn{flex:1}
+.consent{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#4a5a80;margin:10px 0}
+.consent input{width:auto;margin:3px 0 0;min-height:auto}
+.muted{color:#8f9bc0}
+</style>
+</head>
+<body>
+<header><b>ภนว | AI Guide · ห้องเรียนของฉัน</b><a href="/">หน้าหลัก</a></header>
+
+<div id="gate" class="wrap">
+  <div class="gate">
+    <h2>เข้าห้องเรียนของฉัน</h2>
+    <p>กรอกรหัสลงทะเบียน (registrationId จากอีเมล/ใบยืนยัน) และอีเมลหรือเบอร์โทรที่ใช้ลงทะเบียน</p>
+    <input id="rid" placeholder="เช่น SAFE01-0AAF16FA" autocomplete="off">
+    <input id="contact" placeholder="อีเมลหรือเบอร์โทรที่ใช้ลงทะเบียน" autocomplete="off">
+    <div class="err" id="gateErr"></div>
+    <button class="btn primary" id="enterBtn">เข้าสู่ห้องเรียน</button>
+  </div>
+</div>
+
+<div id="app" class="wrap hide">
+  <div class="card"><h3 id="courseName">–</h3><div id="statusLine" style="font-size:13px;color:#64749b"></div></div>
+  <div class="card"><h3>บทเรียน</h3><div id="lessonsBody">กำลังโหลด…</div></div>
+  <div class="card">
+    <h3>ส่งลิงก์ผลงาน</h3>
+    <input id="projectName" placeholder="ชื่อผลงาน" autocomplete="off">
+    <input id="projectUrl" placeholder="ลิงก์ผลงาน (https://...)" autocomplete="off">
+    <label class="consent"><input type="checkbox" id="consentPublish"><span>ยินยอมให้นำผลงานนี้ไปแสดงในคลังผลงานสาธารณะของ ภนว | AI Guide (เลือกได้ ไม่บังคับ และสามารถขอถอนความยินยอมได้ภายหลังโดยติดต่อผู้สอน)</span></label>
+    <button class="btn accent" style="width:auto" id="submitBtn">📤 ส่งลิงก์ผลงาน</button>
+    <div class="err" id="submitErr"></div>
+  </div>
+  <div class="card"><h3>ผลงานที่ส่งไปแล้ว</h3><div id="subsBody">ยังไม่มีผลงานที่ส่ง</div></div>
+  <div class="card"><a class="btn outline" style="width:100%" href="https://script.google.com/macros/s/AKfycbwrkoVRqjl1r6C_Q1SYA9hHX_nuyxrfdlftoBDCFqZg_23kUG8fQv3i4P4UojuTNlZv/exec?page=feedback" target="_blank" rel="noopener noreferrer">📝 ประเมินผลหลังเรียน (ระบบเดิม) ↗</a></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var RID = sessionStorage.getItem('myClassRid') || '';
+var CONTACT = sessionStorage.getItem('myClassContact') || '';
+
+function el(tag, attrs, children){
+  var node = document.createElement(tag);
+  attrs = attrs || {};
+  Object.keys(attrs).forEach(function(k){
+    if (k === 'class') node.className = attrs[k];
+    else if (k === 'text') node.textContent = attrs[k];
+    else node.setAttribute(k, attrs[k]);
+  });
+  (children||[]).forEach(function(c){ node.appendChild(c); });
+  return node;
+}
+function isSafeUrl(url){ return /^https:\/\//i.test(url||'') || /^http:\/\/[^\s]+/i.test(url||''); }
+function clear(node){ while(node.firstChild) node.removeChild(node.firstChild); }
+
+async function api(path, opts){
+  opts = opts || {};
+  var res = await fetch('/api/' + path, {
+    method: opts.method || 'GET',
+    headers: opts.body ? {'content-type':'application/json'} : undefined,
+    body: opts.body ? JSON.stringify(opts.body) : undefined
+  });
+  var data = await res.json().catch(function(){ return {}; });
+  if (!res.ok || data.ok === false) { var e = new Error(data.error || ('HTTP_'+res.status)); e.status = res.status; throw e; }
+  return data;
+}
+
+function enter(){
+  RID = document.getElementById('rid').value.trim();
+  CONTACT = document.getElementById('contact').value.trim();
+  document.getElementById('gateErr').textContent = '';
+  if(!RID || !CONTACT){ document.getElementById('gateErr').textContent='กรุณากรอกข้อมูลให้ครบ'; return; }
+  load();
+}
+document.getElementById('enterBtn').addEventListener('click', enter);
+
+async function load(){
+  try {
+    var d = await api('class/me', {method:'POST', body:{registrationId: RID, contact: CONTACT}});
+    sessionStorage.setItem('myClassRid', RID);
+    sessionStorage.setItem('myClassContact', CONTACT);
+    document.getElementById('gate').classList.add('hide');
+    document.getElementById('app').classList.remove('hide');
+    document.getElementById('courseName').textContent = d.courseName;
+    document.getElementById('statusLine').textContent = 'สถานะการลงทะเบียน: ' + d.status;
+
+    var lessonsBody = document.getElementById('lessonsBody'); clear(lessonsBody);
+    if (!d.lessons.length) {
+      lessonsBody.appendChild(el('span',{class:'muted',text:'ยังไม่มีบทเรียนที่เผยแพร่สำหรับรุ่นนี้'}));
+    } else {
+      d.lessons.forEach(function(l){
+        var statusPill = el('span',{class:'pill'+(l.status==='DONE'?' done':''), text:l.status});
+        var info = el('div',{},[el('b',{text:l.title}), el('br'), statusPill]);
+        var actions = el('div',{class:'actions'});
+        if (isSafeUrl(l.resourceUrl)) actions.appendChild(el('a',{class:'btn outline', href:l.resourceUrl, target:'_blank', rel:'noopener noreferrer', text:'เรียนต่อ'}));
+        var doneBtn = el('button',{class:'btn accent', text:'ทำแล้ว'});
+        doneBtn.addEventListener('click', function(){ markDone(l.lessonId); });
+        actions.appendChild(doneBtn);
+        lessonsBody.appendChild(el('div',{class:'lesson'},[info, actions]));
+      });
+    }
+
+    var subsBody = document.getElementById('subsBody'); clear(subsBody);
+    if (!d.submissions.length) {
+      subsBody.appendChild(el('span',{class:'muted',text:'ยังไม่มีผลงานที่ส่ง'}));
+    } else {
+      d.submissions.forEach(function(s){
+        var info = el('div',{},[el('b',{text:s.projectName}), el('br'), el('span',{class:'pill',text:s.reviewStatus})]);
+        if (s.reviewerNote) { info.appendChild(el('br')); info.appendChild(el('small',{text:s.reviewerNote})); }
+        var row = el('div',{class:'lesson'},[info]);
+        if (isSafeUrl(s.projectUrl)) row.appendChild(el('a',{class:'btn outline', href:s.projectUrl, target:'_blank', rel:'noopener noreferrer', text:'เปิดผลงาน'}));
+        subsBody.appendChild(row);
+      });
+    }
+  } catch (e) {
+    document.getElementById('gateErr').textContent = 'ไม่พบข้อมูลการลงทะเบียน ตรวจสอบรหัสและอีเมล/เบอร์โทรอีกครั้ง';
+  }
+}
+
+async function markDone(lessonId){
+  try { await api('class/lesson/mark', {method:'POST', body:{registrationId:RID, contact:CONTACT, lessonId:lessonId, status:'DONE'}}); load(); }
+  catch (e) { alert('บันทึกไม่สำเร็จ: ' + e.message); }
+}
+
+document.getElementById('submitBtn').addEventListener('click', async function(){
+  document.getElementById('submitErr').textContent='';
+  try {
+    await api('class/submit', {method:'POST', body:{
+      registrationId: RID, contact: CONTACT,
+      projectName: document.getElementById('projectName').value.trim(),
+      projectUrl: document.getElementById('projectUrl').value.trim(),
+      permissionToPublish: document.getElementById('consentPublish').checked === true
+    }});
+    document.getElementById('projectName').value=''; document.getElementById('projectUrl').value=''; document.getElementById('consentPublish').checked=false;
+    load();
+  } catch (e) { document.getElementById('submitErr').textContent = 'ส่งผลงานไม่สำเร็จ: ' + e.message; }
+});
+
+if (RID && CONTACT) load();
+})();
+</script>
+</body>
+</html>
