@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="ภนว | AI Guide — ศูนย์การเรียนรู้สร้าง Web App ด้วย AI จากงานจริง">
+<meta name="theme-color" content="#101b44">
+<title>AI Guide Teaching Hub | ภนว</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700;800&family=Inter:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#111d4b;--ink:#17244d;--blue:#3973ff;--violet:#7250ff;--coral:#ff7484;--mint:#0aa88c;--text:#34456f;--light:#f3f6ff;--line:#e4e9fa;font-family:'IBM Plex Sans Thai',sans-serif;color:var(--ink)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:linear-gradient(160deg,#dceaff 0,#f7f8ff 32%,#f4f2ff 75%,#f8fbff 100%)}button,input,textarea,select{font:inherit}a{color:inherit}.wrap{width:min(1120px,calc(100% - 32px));margin:auto}.nav{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:19px 0}.identity{text-decoration:none;display:flex;align-items:center;gap:12px;font-weight:800}.mark{display:grid;place-items:center;background:var(--navy);color:#fff;width:43px;height:43px;border-radius:15px;font:800 15px Inter}.identity small{display:block;color:#64749b;font-size:12px;font-weight:500}.navlinks{display:flex;align-items:center;gap:16px}.navlinks a{font-size:13px;text-decoration:none;font-weight:700;color:#435480}.navlinks .outline{padding:11px 17px;border:1px solid #b3c2ef;border-radius:12px;background:white;color:var(--navy)}
+.hero{position:relative;overflow:hidden;border-radius:28px;background:radial-gradient(circle at 80% 20%,#457ffc,transparent 38%),linear-gradient(135deg,#172450,#4e46db);color:#fff;padding:45px 43px 42px;box-shadow:0 20px 38px #22315b14}
+.hero:before{content:'</>';font:800 150px Inter;position:absolute;right:45px;top:35px;color:#ffffff13;transform:rotate(-12deg)}.eyebrow{font-size:12px;letter-spacing:1.4px;color:#bce0ff;font-weight:700}.hero h1{font-size:clamp(35px,5.5vw,64px);line-height:1.17;margin:16px 0;max-width:760px;letter-spacing:-1.3px}.hero h1 em{font-style:normal;color:#a3edff}.hero p{font-size:17px;line-height:1.8;max-width:680px;color:#edf2ff;margin:0 0 26px}.chips{display:flex;flex-wrap:wrap;gap:9px;margin:0 0 27px}.chip{background:#ffffff19;border:1px solid #ffffff35;border-radius:99px;padding:7px 13px;font-size:12px}.actions{display:flex;gap:10px;flex-wrap:wrap}.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:0;border-radius:13px;padding:12px 19px;text-decoration:none;font-weight:800;cursor:pointer;min-height:45px}.btn.primary{background:#fff;color:var(--navy)}.btn.accent{background:#ffb05f;color:var(--navy)}.btn.secondary{background:#edf2ff;color:var(--navy)}.btn.dark{background:var(--navy);color:#fff}.btn.line{background:#07b75d;color:#fff}.btn:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid #f9a83b;outline-offset:2px}
+.note{font-size:12px;color:#c9d8ff;margin-top:20px}.section{margin-top:38px}.section-head{display:flex;gap:12px;align-items:end;justify-content:space-between;margin-bottom:15px;flex-wrap:wrap}.section-head h2{font-size:clamp(22px,2.8vw,29px);margin:0}.section-head p{color:#596a90;margin:4px 0 0;font-size:13px}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.card{background:#fff;border:1px solid var(--line);border-radius:21px;padding:22px;box-shadow:0 7px 20px #23325a09}.card-icon{font-size:26px}.card h3{font-size:19px;margin:14px 0 6px}.card p{font-size:13px;line-height:1.75;color:#687797;margin:0 0 15px;min-height:45px}.card a{font-weight:800;color:#3c5de3;font-size:13px;text-decoration:none}.smalltag{display:inline-block;font-size:11px;font-weight:700;background:#edf1ff;color:#4862ce;border-radius:7px;padding:5px 9px;margin-top:10px}.steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:13px}.step{padding:20px 15px;background:white;border:1px solid var(--line);border-radius:18px}.num{width:35px;height:35px;display:grid;place-items:center;border-radius:50%;color:white;font:800 16px Inter;background:linear-gradient(130deg,var(--violet),var(--blue));margin-bottom:12px}.step strong{display:block;font-size:15px;margin-bottom:6px}.step p{margin:0;color:#627499;font-size:12px;line-height:1.7}.workshop{display:grid;grid-template-columns:1fr 1fr;gap:16px}.panel{background:#fff;border:1px solid var(--line);border-radius:22px;padding:23px}.panel h3{font-size:20px;margin:0 0 9px}.panel p,.panel li{color:#596b91;line-height:1.8;font-size:13px}.panel ul{padding-left:20px}.panel.callout{background:#14224f;color:#fff;border-color:#14224f}.panel.callout p,.panel.callout li{color:#d8e6ff}.panel .meta{font-weight:700;font-size:14px;color:inherit}.help{font-size:12px;color:#7181a4;margin-top:7px}.builder{background:#fff;border:1px solid var(--line);border-radius:24px;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;box-shadow:0 14px 34px #202c5b11}.formcol,.outputcol{padding:26px}.outputcol{background:#121e4c;color:white}.builder h3{margin:0 0 9px;font-size:21px}.builder p{font-size:13px;line-height:1.75;margin:0 0 16px;color:#687797}.outputcol p{color:#dbe4ff}.field{display:block;margin:13px 0}.field span{font-size:13px;font-weight:700;display:block;margin-bottom:6px}.field input,.field textarea,.field select{width:100%;padding:12px 13px;border:1px solid #d6def0;border-radius:11px;background:#fafbff;color:#1e2a52;min-height:44px}.field textarea{min-height:77px;resize:vertical}.field select{cursor:pointer}.sample{white-space:pre-wrap;overflow-wrap:anywhere;background:#071230;border:1px solid #394b86;border-radius:13px;color:#d7e6ff;padding:18px;min-height:308px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:13px;line-height:1.85}.builder-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}.outputcol .btn.primary{background:#b9d5ff}.status{font-size:12px;color:#a7f3cc;min-height:18px;margin-top:8px}
+.links{display:flex;gap:10px;flex-wrap:wrap}.pill{background:white;border:1px solid #d9e1f5;border-radius:999px;padding:11px 15px;font-size:13px;font-weight:700;text-decoration:none}.pill:hover,.card a:hover{text-decoration:underline}.footer{padding:30px 0;margin-top:40px;border-top:1px solid #dce4f3;color:#65769c;font-size:12px}.small{font-size:12px}.highlight{color:#66e4fc}
+@media(max-width:850px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.steps{grid-template-columns:repeat(3,minmax(0,1fr))}.builder{grid-template-columns:1fr}.navlinks a:not(.outline){display:none}.hero{padding:32px 25px}.hero:before{font-size:90px;right:4px;top:50px}.workshop{grid-template-columns:1fr}}
+@media(max-width:560px){.wrap{width:min(100% - 22px,1120px)}.grid,.steps{grid-template-columns:1fr}.nav{padding:12px 0}.identity small{font-size:10px}.hero{border-radius:20px;padding:28px 20px}.hero h1{font-size:34px}.hero p{font-size:14px}.btn{width:100%}.actions{width:100%}.card,.panel{padding:19px}.formcol,.outputcol{padding:20px}.section{margin-top:26px}.section-head h2{font-size:23px}}
+</style>
+</head>
+<body>
+<header class="wrap nav">
+ <a class="identity" href="/"><span class="mark">AI</span><span>ภนว | AI Guide<small>AI APP BUILDER · TEACHING HUB</small></span></a>
+ <nav class="navlinks" aria-label="การนำทาง"><a href="#path">ขั้นตอนเรียน</a><a href="#tools">เครื่องมือ</a><a href="#builder">สร้างโจทย์</a><a class="outline" href="/">หน้าหลักเดิม ↗</a></nav>
+</header>
+<main class="wrap">
+<section class="hero" aria-labelledby="hero-title">
+ <div class="eyebrow">AI APP BUILDER WORKSHOP · รุ่นที่ 2</div>
+ <h1 id="hero-title">จากคนใช้ระบบ<br>สู่คนสร้าง <em>Web App</em> ของตัวเอง</h1>
+ <p>ศูนย์รวมการเรียนรู้และลงมือสร้างระบบด้วย AI ในที่เดียว เริ่มจากโจทย์งานของคุณ แล้วใช้ AI ช่วยออกแบบ สร้างฟอร์ม จัดเก็บข้อมูล ทำ Dashboard และเปิดใช้งานจริง</p>
+ <div class="chips"><span class="chip">📅 เสาร์ 28 พฤศจิกายน 2569</span><span class="chip">🕘 09.00–16.00 น.</span><span class="chip">📍 Miracle Café บางละมุง</span><span class="chip">💸 990 บาท/คน</span></div>
+ <div class="actions"><a class="btn accent" href="#builder">✨ เริ่มสร้างโจทย์แอปของฉัน</a><a class="btn primary" href="https://line.me/ti/p/gKI_G19vaU" target="_blank" rel="noopener noreferrer">💬 สอบถาม / สมัครทาง LINE</a></div>
+ <div class="note">รวมอาหารกลางวันและเบรกเช้า–บ่าย · ไม่ต้องมีพื้นฐานเขียนโค้ด · ผู้เรียนลงมือทำจริง</div>
+</section>
+<section id="path" class="section">
+ <div class="section-head"><div><h2>เส้นทางเรียนรู้ใน 1 วัน</h2><p>ใช้แนวทางจาก AI Safety App Builder รุ่นแรกเป็นฐาน และปรับให้ใช้กับงานทุกสายอาชีพ</p></div></div>
+ <div class="steps">
+ <article class="step"><div class="num">1</div><strong>ตั้งโจทย์</strong><p>เลือกปัญหาจากงานจริง กำหนดผู้ใช้และข้อมูลที่ต้องเก็บ</p></article>
+ <article class="step"><div class="num">2</div><strong>สั่ง AI</strong><p>ฝึกเขียน Prompt เพื่อให้ AI ช่วยวางแผนและสร้างแอป</p></article>
+ <article class="step"><div class="num">3</div><strong>สร้างฟอร์ม</strong><p>ออกแบบหน้ากรอกข้อมูลและการบันทึกลงฐานข้อมูล</p></article>
+ <article class="step"><div class="num">4</div><strong>ทำ Dashboard</strong><p>สรุปข้อมูล ตรวจสอบสถานะ และทดสอบการใช้งาน</p></article>
+ <article class="step"><div class="num">5</div><strong>เปิดใช้จริง</strong><p>เรียนรู้การ Deploy ทดสอบบนมือถือ และรับลิงก์แอป</p></article>
+ </div>
+</section>
+<section class="section">
+ <div class="section-head"><div><h2>ทางเข้าหลัก</h2><p>ลิงก์ระบบเดิมยังใช้ต่อ ไม่มีการสร้างฐานข้อมูลสมัครเรียนซ้ำ</p></div></div>
+ <div class="grid">
+ <article class="card"><div class="card-icon">🎓</div><h3>Safety App Academy</h3><p>ศูนย์หลักสูตรเดิม ข้อมูลรุ่นอบรมและกระบวนการรับสมัคร–ชำระเงินในระบบเดิม</p><a href="/academy/">เปิด Academy เดิม ↗</a><div class="smalltag">เชื่อมระบบ Google Apps Script เดิม</div></article>
+ <article class="card"><div class="card-icon">🧠</div><h3>โจทย์และ Prompt</h3><p>กรอกความต้องการ แล้วสร้างคำสั่งสำหรับนำไปให้ ChatGPT หรือ Codex ช่วยทำแอป</p><a href="#builder">เปิดเครื่องมือสร้างโจทย์ ↗</a><div class="smalltag">ทำงานได้บนหน้านี้</div></article>
+ <article class="card"><div class="card-icon">📱</div><h3>ทดลองแอปจริง</h3><p>ดูตัวอย่างแอปที่พัฒนาจากโจทย์งานจริง เพื่อใช้เป็นแรงบันดาลใจ</p><a href="#showcase">เปิดคลังตัวอย่าง ↗</a><div class="smalltag">ไม่แสดงข้อมูลผู้เรียนส่วนตัว</div></article>
+ </div>
+</section>
+<section id="builder" class="section">
+ <div class="section-head"><div><h2>เครื่องมือช่วยตั้งโจทย์ Web App</h2><p>นักเรียนเริ่มตรงนี้ได้เลย ไม่ต้องรู้ศัพท์เทคนิคหรือเขียนโค้ด</p></div></div>
+ <div class="builder">
+ <form class="formcol" id="briefForm">
+  <h3>📝 บอก AI ว่าอยากสร้างอะไร</h3><p>กรอกตามงานจริงของตัวเอง แล้วคัดลอกคำสั่งไปใช้กับ ChatGPT หรือ Codex</p>
+  <label class="field"><span>ประเภทงาน</span><select id="track"><option value="งานความปลอดภัย">⛑️ งานความปลอดภัย</option><option value="ร้านกาแฟ/ร้านอาหาร">☕ ร้านกาแฟ/ร้านอาหาร</option><option value="บัญชีรายรับรายจ่าย">💰 บัญชีรายรับรายจ่าย</option><option value="งานขนส่ง">🚚 งานขนส่ง</option><option value="งานบุคคล HR">👥 งานบุคคล HR</option><option value="ร้านค้าและสต็อก">📦 ร้านค้าและสต็อก</option><option value="งานอื่นๆ">💡 งานอื่น ๆ</option></select></label>
+  <label class="field"><span>ชื่อแอปที่อยากสร้าง</span><input id="appName" maxlength="100" placeholder="เช่น ระบบตรวจความปลอดภัยประจำวัน" required></label>
+  <label class="field"><span>ใครจะใช้แอปนี้</span><input id="audience" maxlength="180" placeholder="เช่น พนักงานหน้างานและหัวหน้างาน" required></label>
+  <label class="field"><span>อยากให้แอปทำอะไรได้บ้าง</span><textarea id="features" maxlength="1100" placeholder="เช่น เพิ่มรายการตรวจ, แนบรูป, ดูรายงาน, ค้นหาข้อมูล" required></textarea></label>
+  <label class="field"><span>ข้อมูลที่จะบันทึก (ถ้ามี)</span><textarea id="fields" maxlength="850" placeholder="เช่น วันที่, ชื่อผู้ตรวจ, สถานที่, ผลตรวจ"></textarea></label>
+  <button type="submit" class="btn dark">✨ สร้างคำสั่งให้ AI</button>
+ </form>
+ <div class="outputcol">
+  <h3>🤖 คำสั่งพร้อมใช้งาน</h3><p>ปรับรายละเอียดทางซ้ายแล้วกดสร้างคำสั่ง ข้อความนี้ไม่ถูกส่งไปเก็บในฐานข้อมูล</p>
+  <div class="sample" id="promptText" aria-live="polite">กรอกชื่อแอป ผู้ใช้งาน และความสามารถที่ต้องการ แล้วกด “สร้างคำสั่งให้ AI”</div>
+  <div class="builder-actions"><button type="button" class="btn primary" id="copyBtn">📋 คัดลอกคำสั่ง</button><a class="btn secondary" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">เปิด ChatGPT ↗</a><a class="btn secondary" href="https://chatgpt.com/codex" target="_blank" rel="noopener noreferrer">เปิด Codex ↗</a></div>
+  <div class="status" id="copyStatus" aria-live="polite"></div>
+ </div>
+ </div>
+</section>
+<section id="showcase" class="section">
+ <div class="section-head"><div><h2>คลังตัวอย่างแอปที่พัฒนาแล้ว</h2><p>ลิงก์สาธิตสำหรับนำไปเรียนรู้จากระบบจริง ไม่รวมข้อมูลธุรกิจหรือข้อมูลส่วนตัวของนักเรียน</p></div></div>
+ <div class="grid">
+  <article class="card"><div class="card-icon">⚠️</div><h3>JP Risk AI</h3><p>กิจกรรมประเมินอันตรายและฝึกใช้ AI จากโจทย์ความปลอดภัยจริง</p><a href="https://jp-risk-ai-2569.chief-henley.workers.dev/" target="_blank" rel="noopener noreferrer">ทดลองเกมประเมินอันตราย ↗</a></article>
+  <article class="card"><div class="card-icon">💌</div><h3>Wedding E-Card</h3><p>ตัวอย่างการนำ Web App ไปสร้างการ์ดเชิญออนไลน์แบบโต้ตอบได้</p><a href="https://wedding-ecard-studio.pages.dev/card/jub-tam-2570/" target="_blank" rel="noopener noreferrer">ดูตัวอย่าง E-Card ↗</a></article>
+  <article class="card"><div class="card-icon">🗂️</div><h3>โครงการต้นแบบจากรุ่นแรก</h3><p>ระบบลงทะเบียนผู้รับเหมา แบบทดสอบ และ Dashboard เป็นโจทย์ที่ใช้ฝึกในรุ่นแรก</p><a href="/academy/">กลับไปดูหลักสูตรต้นฉบับ ↗</a></article>
+ </div>
+</section>
+<section id="tools" class="section">
+ <div class="section-head"><div><h2>เครื่องมือสำหรับนักเรียน</h2><p>ยึดรายการเครื่องมือจากบทเรียนรุ่นแรก ใช้เฉพาะที่จำเป็นกับโปรเจกต์ที่เลือก</p></div></div>
+ <div class="links">
+ <a class="pill" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">💬 ChatGPT ↗</a>
+ <a class="pill" href="https://chatgpt.com/codex" target="_blank" rel="noopener noreferrer">🤖 Codex ↗</a>
+ <a class="pill" href="https://sheets.google.com/" target="_blank" rel="noopener noreferrer">📊 Google Sheets ↗</a>
+ <a class="pill" href="https://script.google.com/" target="_blank" rel="noopener noreferrer">⚙️ Apps Script ↗</a>
+ <a class="pill" href="https://nodejs.org/" target="_blank" rel="noopener noreferrer">🧰 Node.js ↗</a>
+ <a class="pill" href="https://developers.google.com/apps-script/guides/clasp" target="_blank" rel="noopener noreferrer">📖 clasp Guide ↗</a>
+ </div>
+</section>
+<section class="section workshop">
+ <div class="panel callout">
+  <h3>📅 ห้องเรียนรุ่นที่ 2</h3>
+  <p class="meta">วันเสาร์ที่ 28 พฤศจิกายน 2569 · 09.00–16.00 น.</p>
+  <p>Miracle Café (ซอยวัดโป่งสะเก็ด) อ.บางละมุง จ.ชลบุรี · ค่าอบรม 990 บาท/คน รวมอาหารกลางวันและเบรกเช้า–บ่าย</p>
+  <div class="actions"><a class="btn accent" href="https://maps.app.goo.gl/sD4CMon6XH5KqH1H7" target="_blank" rel="noopener noreferrer">📍 แผนที่</a><a class="btn line" href="https://line.me/ti/p/gKI_G19vaU" target="_blank" rel="noopener noreferrer">💬 สมัคร / สอบถาม LINE</a></div>
+ </div>
+ <div class="panel">
+  <h3>🛠️ สิ่งที่ยังใช้ระบบเดิม</h3>
+  <ul><li>หลักสูตรและข้อมูลการสมัครเดิมอยู่ใน Safety App Academy</li><li>การชำระเงินและหลักฐานยังอยู่ในฐานข้อมูลเดิม</li><li>ระบบประเมินผลจากรุ่นแรกยังเก็บในฐานเดิม</li><li>รอบ 28 พฤศจิกายนยังไม่อยู่ในฐาน SESSIONS ณ วันที่จัดทำหน้านี้ จึงใช้ LINE สำหรับติดต่อสมัครรุ่น 2</li></ul>
+  <p class="help">หน้าศูนย์รวมนี้ไม่แสดงรายชื่อ เบอร์โทร สลิป หรือข้อมูลส่วนบุคคลของผู้สมัคร และไม่ได้สร้างฐานข้อมูลใหม่</p>
+ </div>
+</section>
+</main>
+<footer class="wrap footer">© ภนว | AI Guide · AI App Builder Teaching Hub · <a href="/">เว็บไซต์หลัก</a> · <a href="/academy/">ระบบ Academy เดิม</a></footer>
+<script>
+(function(){
+  "use strict";
+  var form=document.getElementById("briefForm");
+  var output=document.getElementById("promptText");
+  var status=document.getElementById("copyStatus");
+  form.addEventListener("submit",function(e){
+    e.preventDefault();
+    if(!form.reportValidity())return;
+    var v=function(id){return document.getElementById(id).value.trim()};
+    var text="งาน: ช่วยออกแบบและพัฒนา Web App ชื่อ \""+v("appName")+"\" ให้ใช้กับ"+v("track")+"\n\n"+
+      "บริบท:\n- ผู้ใช้งาน: "+v("audience")+"\n- งานที่ต้องทำ: "+v("features")+"\n"+
+      "- ข้อมูลที่ต้องบันทึก: "+(v("fields")||"ให้ช่วยเสนอข้อมูลที่จำเป็น พร้อมอธิบายเหตุผล")+"\n\n"+
+      "รูปแบบผลลัพธ์:\n1. สรุปปัญหาและขอบเขตระบบอย่างเข้าใจง่าย\n2. ออกแบบหน้าจอบนมือถือและคอมพิวเตอร์\n3. ออกแบบฟอร์มและโครงสร้างฐานข้อมูลที่จำเป็น\n4. อธิบายการทำงานของระบบและ Dashboard\n5. สร้างโค้ดหรือขั้นตอนลงมือทำทีละส่วนอย่างชัดเจน\n6. บอกวิธีทดสอบและนำระบบขึ้นออนไลน์\n\n"+
+      "เงื่อนไข:\n- ผู้ใช้ไม่ใช่โปรแกรมเมอร์ กรุณาอธิบายเป็นภาษาไทยเข้าใจง่าย\n- ให้เริ่มจากระบบขนาดเล็กที่ใช้งานได้ก่อน\n- ใช้ข้อมูลตัวอย่างในการสาธิต หลีกเลี่ยงข้อมูลส่วนตัวจริง\n- อย่าลบหรือแก้ระบบที่มีอยู่โดยไม่ได้รับคำสั่ง\n- หากต้องเลือกเครื่องมือหรือฐานข้อมูล ให้เสนอวิธีที่เริ่มต้นง่ายก่อน";
+    output.textContent=text;status.textContent="สร้างคำสั่งแล้ว พร้อมคัดลอกไปใช้";
+  });
+  document.getElementById("copyBtn").addEventListener("click",async function(){
+    var text=output.textContent;
+    if(!text||text.indexOf("กรอกชื่อแอป")===0){status.textContent="กรอกข้อมูลและกดสร้างคำสั่งก่อนครับ";return}
+    try{
+      if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(text)}
+      else{var el=document.createElement("textarea");el.value=text;el.style.position="fixed";el.style.opacity="0";document.body.appendChild(el);el.select();if(!document.execCommand("copy"))throw Error("Copy failed");el.remove()}
+      status.textContent="คัดลอกคำสั่งแล้ว เปิด ChatGPT หรือ Codex เพื่อวางข้อความได้เลย";
+    }catch(err){status.textContent="คัดลอกไม่สำเร็จ กรุณาเลือกข้อความด้านบนเพื่อคัดลอกด้วยตัวเอง"}
+  });
+})();
+</script>
+</body>
+</html>
