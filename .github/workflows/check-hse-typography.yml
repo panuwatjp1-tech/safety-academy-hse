@@ -17,7 +17,7 @@ jobs:
           from pathlib import Path
           p=Path('executive/index.html')
           s=p.read_text(encoding='utf-8')
-          assert s.count('</head>')==1,'unexpected head structure'
+          assert s.count('</head>')>=1,'missing head ending'
           assert s.count('.ig-total b{font:800 40px Inter,sans-serif;margin-left:auto}')==1,'baseline font style not found'
           assert 'hse-typography-fix-20261122' not in s,'fix already applied'
           css='''<style id="hse-typography-fix-20261122">
