@@ -1,39 +1,32 @@
-name: Align safety discipline in HSE presentation
+name: Verify deployed HSE announcement wording
 on:
   push:
     paths:
       - '.github/workflows/hse-announcement-slide-review.yml'
 permissions:
-  contents: write
+  contents: read
 jobs:
-  patch:
+  verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Patch announcement paragraphs and check conflicting fine terms
+      - name: Verify production presentation announcement after deploy
         shell: bash
         run: |
           python - <<'PY'
-          from pathlib import Path
-          p=Path('executive/index.html')
-          s=p.read_text(encoding='utf-8')
-          pairs=[["หัวหน้างานเป็นแบบอย่าง และกำกับผู้ปฏิบัติงานของตน","หัวหน้างานต้องกำกับ ห้ามปราม และสั่งหยุดงานอันตรายทันที · รู้เห็นแล้วละเลยมีความผิดทางวินัย"],["ใช้รถบริษัทตามกฎจราจร · อบรม ลงชื่อรับทราบและยินยอมทุกพื้นที่ ก่อน 1 ธ.ค. 2569","ผู้ได้รับอนุญาตใช้รถบริษัทต้องทำตามกฎจราจร · ชี้แจงมาตรการและลงชื่อรับทราบทุกพื้นที่"],["ฝ่าฝืน: รายวัน 50 บาท / รายเดือน 100 บาทต่อครั้ง · เงินค่าปรับใช้ในกิจกรรมความปลอดภัย","ฝ่าฝืน: สั่งหยุดงาน · Safety ตรวจสอบ บันทึก และประสาน HR · ผิดจริงพิจารณาพักงานทางวินัย 1 วันไม่จ่ายค่าจ้าง เฉพาะเมื่อข้อบังคับบริษัทนั้นรองรับโดยชอบด้วยกฎหมาย · ห้ามปรับหรือหักค่าจ้างเป็นค่าปรับ"],["หัวหน้างานเป็นแบบอย่าง และกำกับผู้ปฏิบัติงาน","หัวหน้างานต้องกำกับ ห้ามปรามและสั่งหยุดงานไม่ปลอดภัย · รู้เห็นแล้วละเลยผิดวินัย"],["ใช้รถบริษัทตามกฎจราจร · อบรม ลงชื่อรับทราบและยินยอมก่อน 1 ธ.ค.","ใช้รถบริษัทตามกฎจราจร · ชี้แจงและลงชื่อรับทราบทุกพื้นที่"],["ฝ่าฝืน: รายวัน 50 บาท / รายเดือน 100 บาทต่อครั้ง → กองทุนกิจกรรมความปลอดภัย","ฝ่าฝืน: สั่งหยุดงาน ตรวจสอบและประสาน HR · ผิดจริงพิจารณาพักงานทางวินัย 1 วันไม่จ่ายค่าจ้างตามข้อบังคับที่ชอบด้วยกฎหมาย · ไม่ปรับหรือหักค่าจ้าง"],["มาตรการทางวินัยใช้ตามข้อบังคับบริษัทและกฎหมายที่เกี่ยวข้อง · แนวทางเพิ่มเติมต้องผ่านการอนุมัติ","ประกาศบริษัทลงวันที่ 12 พ.ย. 2569 มีผล 1 ธ.ค. 2569 · การพักงานไม่จ่ายค่าจ้างต้องมีข้อบังคับรองรับโดยชอบด้วยกฎหมาย"]]
-          for old,new in pairs:
-            occurrences=s.count(old)
-            if occurrences!=1: raise ValueError(f'ABORT: expected exactly 1 match, got {occurrences}: {old}')
-            if new in s: raise ValueError('ABORT: already has new copy')
-            s=s.replace(old,new,1)
-          if 'รายวัน 50 บาท' in s or 'รายเดือน 100 บาท' in s or 'ลงชื่อรับทราบและยินยอม' in s:
-            raise ValueError('ABORT: outdated fine or consent text remains')
-          if s.count('พักงานทางวินัย 1 วัน')<2 or s.count('ประกาศบริษัทลงวันที่ 12 พ.ย. 2569')<1: raise ValueError('ABORT: announcement content not present')
-          p.write_text(s,encoding='utf-8')
-          print('UPDATED',len(pairs),'focused text passages; no slide count, design or dataset edits')
-          
+          import urllib.request,time
+          url='https://safety-academy-hse.pages.dev/executive/'
+          for i in range(18):
+            req=urllib.request.Request(url+'?notice-check=e0afeda-'+str(i),headers={'Cache-Control':'no-cache','User-Agent':'HSE-Announcement-Verification/1.0'})
+            try:
+              with urllib.request.urlopen(req,timeout=15) as r:
+                s=r.read().decode('utf-8')
+              good=('รายวัน 50 บาท' not in s and 'รายเดือน 100 บาท' not in s and 'ลงชื่อรับทราบและยินยอม' not in s and s.count('พักงานทางวินัย 1 วันไม่จ่ายค่าจ้าง')>=2)
+              print('CHECK',i+1,'HTTP 200','NEW_POLICY_COUNT',s.count('พักงานทางวินัย 1 วันไม่จ่ายค่าจ้าง'),'FINE_50',('รายวัน 50 บาท' in s),'FINE_100',('รายเดือน 100 บาท' in s),'PASS' if good else 'WAIT',flush=True)
+              if good: break
+            except Exception as e:
+              print('CHECK',i+1,'ERROR',str(e)[:300],flush=True)
+            time.sleep(5)
+          else:
+            raise SystemExit('PRODUCTION_VERIFICATION_FAILED')
+          print('PRODUCTION_VERIFIED')
           PY
-          git diff --check
-          git diff --stat
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add executive/index.html
-          git commit -m "fix: align HSE executive safety discipline slide with 12 Nov company notice"
-          git push origin HEAD:main
