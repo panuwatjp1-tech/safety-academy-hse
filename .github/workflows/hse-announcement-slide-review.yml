@@ -1,27 +1,40 @@
-name: Review HSE announcement slide alignment
+name: Align safety discipline in HSE presentation
 on:
   push:
     paths:
       - '.github/workflows/hse-announcement-slide-review.yml'
 permissions:
-  contents: read
+  contents: write
 jobs:
-  inspect:
+  patch:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect relevant presentation source without modifying
+      - name: Patch announcement paragraphs and check conflicting fine terms
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
-          import re
           p=Path('executive/index.html')
           s=p.read_text(encoding='utf-8')
-          print('SOURCE_BYTES',len(s.encode()))
-          for term in ['วินัย','ฝ่าฝืน','พักงาน','หยุดงาน','มาตรการ','ประกาศ','งานที่ต้องติดตามต่อ','ผู้รับเหมา','หัวหน้างาน']:
-              m=list(re.finditer(re.escape(term),s))
-              print('TERM',term,'HITS',len(m))
-              for x in m[:12]:
-                  print('MATCH',repr(s[max(0,x.start()-350):min(len(s),x.end()+500)]))
+          pairs=[["หัวหน้างานเป็นแบบอย่าง และกำกับผู้ปฏิบัติงานของตน","หัวหน้างานต้องกำกับ ห้ามปราม และสั่งหยุดงานอันตรายทันที · รู้เห็นแล้วละเลยมีความผิดทางวินัย"],["ใช้รถบริษัทตามกฎจราจร · อบรม ลงชื่อรับทราบและยินยอมทุกพื้นที่ ก่อน 1 ธ.ค. 2569","ผู้ได้รับอนุญาตใช้รถบริษัทต้องทำตามกฎจราจร · ชี้แจงมาตรการและลงชื่อรับทราบทุกพื้นที่"],["ฝ่าฝืน: รายวัน 50 บาท / รายเดือน 100 บาทต่อครั้ง · เงินค่าปรับใช้ในกิจกรรมความปลอดภัย","ฝ่าฝืน: สั่งหยุดงาน · Safety ตรวจสอบ บันทึก และประสาน HR · ผิดจริงพิจารณาพักงานทางวินัย 1 วันไม่จ่ายค่าจ้าง เฉพาะเมื่อข้อบังคับบริษัทนั้นรองรับโดยชอบด้วยกฎหมาย · ห้ามปรับหรือหักค่าจ้างเป็นค่าปรับ"],["หัวหน้างานเป็นแบบอย่าง และกำกับผู้ปฏิบัติงาน","หัวหน้างานต้องกำกับ ห้ามปรามและสั่งหยุดงานไม่ปลอดภัย · รู้เห็นแล้วละเลยผิดวินัย"],["ใช้รถบริษัทตามกฎจราจร · อบรม ลงชื่อรับทราบและยินยอมก่อน 1 ธ.ค.","ใช้รถบริษัทตามกฎจราจร · ชี้แจงและลงชื่อรับทราบทุกพื้นที่"],["ฝ่าฝืน: รายวัน 50 บาท / รายเดือน 100 บาทต่อครั้ง → กองทุนกิจกรรมความปลอดภัย","ฝ่าฝืน: สั่งหยุดงาน ตรวจสอบและประสาน HR · ผิดจริงพิจารณาพักงานทางวินัย 1 วันไม่จ่ายค่าจ้างตามข้อบังคับที่ชอบด้วยกฎหมาย · ไม่ปรับหรือหักค่าจ้าง"],["มาตรการทางวินัยใช้ตามข้อบังคับบริษัทและกฎหมายที่เกี่ยวข้อง · แนวทางเพิ่มเติมต้องผ่านการอนุมัติ","ประกาศบริษัทลงวันที่ 12 พ.ย. 2569 มีผล 1 ธ.ค. 2569 · การพักงานไม่จ่ายค่าจ้างต้องมีข้อบังคับรองรับโดยชอบด้วยกฎหมาย"]]
+          for old,new in pairs:
+            occurrences=s.count(old)
+            if occurrences!=1: raise ValueError(f'ABORT: expected exactly 1 match, got {occurrences}: {old}')
+            if new in s: raise ValueError('ABORT: already has new copy')
+          for old,new in pairs:
+            s=s.replace(old,new,1)
+          if 'รายวัน 50 บาท' in s or 'รายเดือน 100 บาท' in s or 'ลงชื่อรับทราบและยินยอม' in s:
+            raise ValueError('ABORT: outdated fine or consent text remains')
+          if s.count('พักงานทางวินัย 1 วัน')<2 or s.count('ประกาศบริษัทลงวันที่ 12 พ.ย. 2569')<1: raise ValueError('ABORT: announcement content not present')
+          p.write_text(s,encoding='utf-8')
+          print('UPDATED',len(pairs),'focused text passages; no slide count, design or dataset edits')
+          
           PY
+          git diff --check
+          git diff --stat
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add executive/index.html
+          git commit -m "fix: align HSE executive safety discipline slide with 12 Nov company notice"
+          git push origin HEAD:main
