@@ -1,0 +1,59 @@
+name: Check presentation typography rendering
+on:
+  push:
+    paths:
+      - '.github/workflows/check-hse-typography.yml'
+permissions:
+  contents: read
+jobs:
+  visual:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Examine font rules and availability of screenshot browser
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('executive/index.html').read_text(encoding='utf-8')
+          for selector in ['.uat-layout','.uat-ask','.uat-checks','.uat-support','.uat-decision','.ig-check','.ig-card','.ig-ask-h','.fx-env','.fx-envt','.stage','.scene','.slide']:
+            print('SELECTOR',selector)
+            matches=list(re.finditer(re.escape(selector)+r'(?:[^{}]{0,120})\{[^{}]{0,950}\}',s))
+            for m in matches[-5:]: print('RULE',repr(m.group(0)[:1200]))
+          print('PRESENTATION_GFONT',re.findall(r'https://fonts.googleapis.com[^" ]+',s)[:2])
+          PY
+          command -v google-chrome || true
+          command -v chromium || true
+          node -v
+      - name: Capture live slide typography for visual inspection
+        shell: bash
+        run: |
+          mkdir -p /tmp/hse-inspect
+          cd /tmp/hse-inspect
+          npm install --no-save playwright-core@1.58.2 --silent
+          cat > check.cjs <<'JS'
+          const {chromium}=require('playwright-core');
+          (async()=>{
+            let browser;
+            try {
+              browser=await chromium.launch({headless:true,executablePath:'/usr/bin/google-chrome',args:['--no-sandbox','--disable-dev-shm-usage']});
+              const page=await browser.newPage({viewport:{width:1600,height:960},deviceScaleFactor:1});
+              await page.goto('https://safety-academy-hse.pages.dev/executive/?typography-review=20261122',{waitUntil:'domcontentloaded',timeout:45000});
+              await page.waitForTimeout(1500);
+              console.log('TITLE',await page.title());
+              console.log('BUTTONS',JSON.stringify(await page.locator('button').allTextContents()).slice(0,2500));
+              const nav=page.locator('button').filter({hasText:/การสนับสนุนที่ต้องการจากผู้บริหาร/});
+              console.log('TARGET_BUTTON_COUNT',await nav.count());
+              if(await nav.count()>0)await nav.first().click();
+              await page.waitForTimeout(1700);
+              const styles=await page.evaluate(()=>[...document.querySelectorAll('.uat-checks li,.ig-check li,.uat-ask h3,.ig-ask-h b,.fx-env b')].filter(x=>x.getClientRects().length).slice(0,20).map(x=>{let st=getComputedStyle(x),r=x.getBoundingClientRect();return {text:x.textContent.trim().slice(0,75),font:st.fontFamily,size:st.fontSize,line:st.lineHeight,height:Math.round(r.height),width:Math.round(r.width),color:st.color}}));
+              console.log('STYLES',JSON.stringify(styles));
+              const img=await page.screenshot({type:'jpeg',quality:53});
+              console.log('SCREENSHOT_BASE64',img.toString('base64'));
+              console.log('SCREENSHOT_BYTES',img.length);
+            } catch(e){console.log('BROWSER_ERROR',String(e).slice(0,1600));process.exitCode=1}
+            finally{if(browser)await browser.close()}
+          })();
+          JS
+          node check.cjs
