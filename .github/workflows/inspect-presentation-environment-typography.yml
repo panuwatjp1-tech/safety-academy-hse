@@ -1,0 +1,53 @@
+name: Inspect presentation environment and typography
+on:
+  push:
+    paths:
+      - '.github/workflows/inspect-presentation-environment-typography.yml'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect current presentation font rules and source environmental plan
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re,json
+          s=Path('executive/index.html').read_text(encoding='utf-8')
+          print('BYTES',len(s.encode('utf-8')))
+          for p in ['<title>','fonts.googleapis','font-family','font-size','line-height','letter-spacing','@media','@font-face']:
+            print('TAG',p,'COUNT',s.count(p))
+          for m in list(re.finditer('font-family',s))[:14]:
+            print('FONT',repr(s[max(0,m.start()-90):m.end()+150]))
+          for m in list(re.finditer(r'<link[^>]*fonts.googleapis[^>]*>',s))[:5]:
+            print('GOOGLE_FONT',repr(m.group(0)))
+          for term in ['สิ่งแวดล้อม','แผนสิ่งแวดล้อม','ISO 14001','CFO','Scope 1','Scope 2','ขยะ','ของเสีย','น้ำ','พลังงาน','คาร์บอน','ยกระดับวินัยความปลอดภัย','พักงานทางวินัย','บทสรุป']:
+            hits=list(re.finditer(re.escape(term),s))
+            print('TERM',term,'COUNT',len(hits))
+            for m in hits[-6:]:
+              v=s[max(0,m.start()-140):min(len(s),m.end()+260)].replace('\\n',' ')
+              print('CTX',repr(v[:450]))
+          j=re.search(r'<script[^>]*id=["\\\']planData["\\\'][^>]*>(.*?)</script>',s,re.S)
+          if j:
+            print('PLANDATA_LEN',len(j.group(1)))
+            data=json.loads(j.group(1))
+            print('PLAN_KEYS',list(data))
+            plans=data.get('plans',[])
+            for c in ['SGE','AESCON']:
+              cp=[x for x in plans if x.get('c')==c]
+              print('COMPANY',c,'TOTAL',len(cp),'BUDGET_SUM',sum(int(x.get('budget') or 0) for x in cp))
+              from collections import defaultdict
+              cats=defaultdict(lambda: [0,0])
+              for x in cp:
+                ca=x.get('cat','');cats[ca][0]+=1;cats[ca][1]+=int(x.get('budget') or 0)
+              print('CATEGORIES',c,json.dumps(cats,ensure_ascii=False))
+              for x in cp:
+                if any(t in (str(x.get('cat',''))+' '+str(x.get('name',''))).lower() for t in ['สิ่งแวดล้อม','พลังงาน','ของเสีย','น้ำเสีย','คาร์บอน','cfo','solar','iso 14001','waste','ก๊าซเรือนกระจก','มลพิษ']):
+                  print('ENV_PLAN',c,json.dumps(x,ensure_ascii=False)[:700])
+          else:
+            print('PLANDATA_NOT_FOUND')
+          
+          PY
