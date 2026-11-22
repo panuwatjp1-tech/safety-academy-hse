@@ -1,0 +1,27 @@
+name: Review HSE announcement slide alignment
+on:
+  push:
+    paths:
+      - '.github/workflows/hse-announcement-slide-review.yml'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect relevant presentation source without modifying
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('executive/index.html')
+          s=p.read_text(encoding='utf-8')
+          print('SOURCE_BYTES',len(s.encode()))
+          for term in ['วินัย','ฝ่าฝืน','พักงาน','หยุดงาน','มาตรการ','ประกาศ','งานที่ต้องติดตามต่อ','ผู้รับเหมา','หัวหน้างาน']:
+              m=list(re.finditer(re.escape(term),s))
+              print('TERM',term,'HITS',len(m))
+              for x in m[:12]:
+                  print('MATCH',repr(s[max(0,x.start()-350):min(len(s),x.end()+500)]))
+          PY
