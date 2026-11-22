@@ -22,7 +22,6 @@ jobs:
             occurrences=s.count(old)
             if occurrences!=1: raise ValueError(f'ABORT: expected exactly 1 match, got {occurrences}: {old}')
             if new in s: raise ValueError('ABORT: already has new copy')
-          for old,new in pairs:
             s=s.replace(old,new,1)
           if 'รายวัน 50 บาท' in s or 'รายเดือน 100 บาท' in s or 'ลงชื่อรับทราบและยินยอม' in s:
             raise ValueError('ABORT: outdated fine or consent text remains')
