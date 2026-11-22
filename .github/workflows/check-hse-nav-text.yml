@@ -1,0 +1,40 @@
+name: Inspect HSE presentation buttons
+on:
+  push:
+    paths:
+      - '.github/workflows/check-hse-nav-text.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Source rules for presentation primary buttons
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          s=Path('executive/index.html').read_text(encoding='utf-8')
+          for sel in ['.primary','button','button.primary','.control .primary','#next','#present','.topbar','.btn','font:','font-family:']:
+            print('SELECTOR',sel)
+            for m in list(re.finditer(re.escape(sel)+r'[^{}]{0,100}\{[^{}]{0,500}\}',s))[-8:]:print('RULE',repr(m.group(0)[:650]))
+          PY
+      - name: Browser computed font on every action button
+        run: |
+          mkdir /tmp/typography && cd /tmp/typography
+          npm install --no-save playwright-core@1.58.2 --silent
+          cat > audit.cjs <<'JS'
+          const {chromium}=require('playwright-core');
+          (async()=>{
+            const b=await chromium.launch({headless:true,executablePath:'/usr/bin/google-chrome',args:['--no-sandbox']});
+            try{
+              const p=await b.newPage({viewport:{width:1600,height:960}});
+              await p.goto('https://safety-academy-hse.pages.dev/executive/?buttons-review=20261122',{waitUntil:'networkidle',timeout:45000});
+              await p.evaluate(()=>document.fonts.ready);
+              let result=await p.evaluate(()=>[...document.querySelectorAll('button')].filter(x=>/นำเสนอ|ถัดไป|ย้อนกลับ/.test(x.textContent||'')).map(x=>{const s=getComputedStyle(x);return {text:x.textContent,outerHTML:x.outerHTML.slice(0,450),class:x.className,id:x.id,font:s.font,fontFamily:s.fontFamily,fontSize:s.fontSize,color:s.color,background:s.backgroundColor,letterSpacing:s.letterSpacing}}));
+              console.log('BUTTON_AUDIT',JSON.stringify(result));
+            }finally{await b.close()}
+          })();
+          JS
+          node audit.cjs
