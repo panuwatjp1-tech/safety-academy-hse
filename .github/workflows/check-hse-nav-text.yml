@@ -1,40 +1,93 @@
-name: Inspect HSE presentation buttons
+name: Fix Thai presentation action button fonts
 on:
   push:
     paths:
       - '.github/workflows/check-hse-nav-text.yml'
 permissions:
-  contents: read
+  contents: write
 jobs:
-  audit:
+  fix-buttons:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Source rules for presentation primary buttons
+      - name: Apply minimal Thai typeface correction to presentation buttons
+        shell: bash
         run: |
           python - <<'PY'
-          import re
           from pathlib import Path
-          s=Path('executive/index.html').read_text(encoding='utf-8')
-          for sel in ['.primary','button','button.primary','.control .primary','#next','#present','.topbar','.btn','font:','font-family:']:
-            print('SELECTOR',sel)
-            for m in list(re.finditer(re.escape(sel)+r'[^{}]{0,100}\{[^{}]{0,500}\}',s))[-8:]:print('RULE',repr(m.group(0)[:650]))
+          p=Path('executive/index.html')
+          s=p.read_text(encoding='utf-8')
+          target='<style id="hse-typography-fix-20261122">'
+          assert s.count(target)==1,'Scoped typography style missing'
+          start=s.index(target)
+          end=s.index('</style>',start)
+          css="\nbutton#full.primary,button#next.primary{font-family:'IBM Plex Sans Thai',sans-serif!important;font-weight:700!important;font-size:clamp(14px,1vw,16px)!important;line-height:1.4!important;letter-spacing:0!important}\n"
+          assert 'button#full.primary,button#next.primary' not in s,'fix already applied'
+          s=s[:end]+css+s[end:]
+          assert s.count('button#full.primary,button#next.primary')==1
+          p.write_text(s,encoding='utf-8')
+          print('THAI_ACTION_BUTTON_FONTS_APPLIED')
           PY
-      - name: Browser computed font on every action button
+          git diff --check
+      - name: Test display font locally before release
+        shell: bash
         run: |
-          mkdir /tmp/typography && cd /tmp/typography
+          python -m http.server 8766 > /tmp/hse-server.log 2>&1 &
+          sleep 2
+          mkdir -p /tmp/hse-primary-test
+          cd /tmp/hse-primary-test
           npm install --no-save playwright-core@1.58.2 --silent
-          cat > audit.cjs <<'JS'
+          cat > test.cjs <<'JS'
           const {chromium}=require('playwright-core');
           (async()=>{
-            const b=await chromium.launch({headless:true,executablePath:'/usr/bin/google-chrome',args:['--no-sandbox']});
+            const browser=await chromium.launch({headless:true,executablePath:'/usr/bin/google-chrome',args:['--no-sandbox']});
             try{
-              const p=await b.newPage({viewport:{width:1600,height:960}});
-              await p.goto('https://safety-academy-hse.pages.dev/executive/?buttons-review=20261122',{waitUntil:'networkidle',timeout:45000});
-              await p.evaluate(()=>document.fonts.ready);
-              let result=await p.evaluate(()=>[...document.querySelectorAll('button')].filter(x=>/นำเสนอ|ถัดไป|ย้อนกลับ/.test(x.textContent||'')).map(x=>{const s=getComputedStyle(x);return {text:x.textContent,outerHTML:x.outerHTML.slice(0,450),class:x.className,id:x.id,font:s.font,fontFamily:s.fontFamily,fontSize:s.fontSize,color:s.color,background:s.backgroundColor,letterSpacing:s.letterSpacing}}));
-              console.log('BUTTON_AUDIT',JSON.stringify(result));
-            }finally{await b.close()}
+              const page=await browser.newPage({viewport:{width:1600,height:960}});
+              await page.goto('http://127.0.0.1:8766/executive/',{waitUntil:'domcontentloaded',timeout:45000});
+              await page.evaluate(()=>document.fonts.ready);
+              const data=await page.evaluate(()=>['full','next'].map(id=>{const el=document.getElementById(id),s=getComputedStyle(el);return {id,text:el.textContent,font:s.fontFamily,size:parseFloat(s.fontSize),fontWeight:s.fontWeight}}));
+              console.log('LOCAL_PRIMARY_TEST',JSON.stringify(data));
+              if(!data.every(x=>x.font.includes('IBM Plex Sans Thai')&&x.size>=14))throw new Error('Primary buttons still use wrong font or too small size');
+              console.log('LOCAL_PRIMARY_PASS');
+            }finally{await browser.close()}
           })();
           JS
-          node audit.cjs
+          node test.cjs
+      - name: Commit and deploy on existing GitHub Cloudflare integration
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add executive/index.html
+          git commit -m "fix: show Thai labels correctly on HSE presentation controls"
+          git push origin HEAD:main
+      - name: Verify production and capture corrected slide
+        shell: bash
+        run: |
+          cd /tmp/hse-primary-test
+          cat > production.cjs <<'JS'
+          const {chromium}=require('playwright-core');
+          (async()=>{
+            const browser=await chromium.launch({headless:true,executablePath:'/usr/bin/google-chrome',args:['--no-sandbox']});
+            try{
+              const page=await browser.newPage({viewport:{width:1600,height:960}});
+              let good=false;
+              for(let i=0;i<25;i++){
+                await page.goto('https://safety-academy-hse.pages.dev/executive/?buttons-final='+i,{waitUntil:'domcontentloaded',timeout:45000});
+                const metrics=await page.evaluate(()=>['full','next'].map(id=>{const el=document.getElementById(id),s=getComputedStyle(el);return {id,text:el.textContent,font:s.fontFamily,size:parseFloat(s.fontSize)}}));
+                good=metrics.every(x=>x.font.includes('IBM Plex Sans Thai')&&x.size>=14);
+                console.log('PRODUCTION_BUTTON_CHECK',i+1,good?'PASS':'WAIT',JSON.stringify(metrics));
+                if(good)break;
+                await page.waitForTimeout(4500);
+              }
+              if(!good)throw new Error('Production buttons not fixed');
+              await page.locator('button').filter({hasText:/การสนับสนุนที่ต้องการจากผู้บริหาร/}).first().click();
+              await page.evaluate(()=>document.fonts.ready);
+              await page.waitForTimeout(900);
+              const img=await page.screenshot({type:'jpeg',quality:50});
+              console.log('SCREENSHOT_BASE64',img.toString('base64'));
+              console.log('PRODUCTION_PRIMARY_VERIFIED');
+            }finally{await browser.close()}
+          })();
+          JS
+          node production.cjs
