@@ -1,0 +1,66 @@
+name: Read HSE Executive slides for management Q&A
+on:
+  push:
+    paths:
+      - '.github/workflows/hse-executive-qa-audit.yml'
+permissions:
+  contents: read
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read all 10 live presentation scenes and source status figures
+        shell: bash
+        run: |
+          mkdir -p /tmp/hse-qa && cd /tmp/hse-qa
+          npm install --no-save playwright-core@1.58.2 --silent
+          cat > review.cjs <<'JS'
+          const {chromium}=require('playwright-core');
+          (async()=>{
+            const b=await chromium.launch({headless:true,executablePath:'/usr/bin/google-chrome',args:['--no-sandbox','--disable-dev-shm-usage']});
+            try{
+              const p=await b.newPage({viewport:{width:1600,height:960},deviceScaleFactor:1});
+              await p.goto('https://safety-academy-hse.pages.dev/executive/?managementqa=20261122',{waitUntil:'domcontentloaded',timeout:45000});
+              await p.evaluate(()=>document.fonts.ready);
+              await p.waitForTimeout(1200);
+              const info=await p.evaluate(()=>{
+                const buttons=[...document.querySelectorAll('button')].slice(0,30).map(x=>({id:x.id,cl:x.className,text:x.innerText.trim().slice(0,90)}));
+                const scripts=[...document.querySelectorAll('script')].map(x=>({id:x.id,type:x.type,length:x.textContent.length})).filter(x=>x.id||x.length>5000);
+                return {title:document.title,buttons,scripts};
+              });console.log('DOCUMENT_STRUCTURE',JSON.stringify(info));
+              const nav=p.locator('button.nav');
+              const count=await nav.count(); console.log('NAV_COUNT',count);
+              for(let i=0;i<10;i++){
+                if(count===10) await nav.nth(i).click();
+                else {
+                  const btn=p.locator('button').filter({hasText:new RegExp('^\\s*'+String(i+1).padStart(2,'0')+'\\s')});
+                  if(await btn.count()<1)throw new Error('No navigation for slide '+(i+1));
+                  await btn.first().click();
+                }
+                await p.waitForTimeout(330);
+                const datum=await p.evaluate(()=>{
+                  const stage=document.querySelector('.stage');
+                  const selection=[...document.querySelectorAll('.nav.active')].map(x=>x.innerText.trim());
+                  const t=stage?.innerText||stage?.textContent||'';
+                  const liveTexts=[...document.querySelectorAll('.stage [data-live],.stage [data-source]')].map(x=>x.textContent.trim().slice(0,180));
+                  return {active:selection,scene:document.getElementById('counter')?.textContent||'',text:t.slice(0,13000),length:t.length,links:[...stage?.querySelectorAll('a')||[]].map(x=>({text:x.textContent.trim(),href:x.href})).slice(0,14),liveTexts};
+                });
+                console.log('SLIDE_'+String(i+1).padStart(2,'0'),JSON.stringify(datum));
+              }
+              const summary=await p.evaluate(()=>{
+                const node=document.querySelector('#planData');
+                if(!node)return {};
+                const d=JSON.parse(node.textContent);
+                const group={};
+                for(const c of ['SGE','AESCON']){
+                  const rows=d.plans.filter(x=>x.c===c);
+                  group[c]={count:rows.length,budget:rows.reduce((a,x)=>a+(Number(x.budget)||0),0),status:[...new Set(rows.map(x=>x.status))],categories:[...new Set(rows.map(x=>x.cat))],environment:rows.filter(x=>/สิ่งแวดล้อม|Carbon|CFO|Eco-Safe|น้ำเสีย|กาก|TSM/i.test(x.name+' '+x.cat)).map(x=>({no:x.no,name:x.name,cat:x.cat,budget:x.budget,status:x.status}))};
+                }
+                return {group,resultsCounts:d.results?.length};
+              });console.log('SOURCE_PLAN_AUDIT',JSON.stringify(summary));
+              console.log('AUDIT_DONE');
+            }finally{await b.close()}
+          })();
+          JS
+          node review.cjs
