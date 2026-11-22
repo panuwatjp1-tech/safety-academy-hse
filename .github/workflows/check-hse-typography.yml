@@ -1,4 +1,4 @@
-name: Check presentation typography rendering
+name: Check policy slide typography
 on:
   push:
     paths:
@@ -6,54 +6,42 @@ on:
 permissions:
   contents: read
 jobs:
-  visual:
+  inspect:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Examine font rules and availability of screenshot browser
-        shell: bash
+      - name: Examine banner typography rules in source
         run: |
           python - <<'PY'
-          from pathlib import Path
           import re
+          from pathlib import Path
           s=Path('executive/index.html').read_text(encoding='utf-8')
-          for selector in ['.uat-layout','.uat-ask','.uat-checks','.uat-support','.uat-decision','.ig-check','.ig-card','.ig-ask-h','.fx-env','.fx-envt','.stage','.scene','.slide']:
-            print('SELECTOR',selector)
-            matches=list(re.finditer(re.escape(selector)+r'(?:[^{}]{0,120})\{[^{}]{0,950}\}',s))
-            for m in matches[-5:]: print('RULE',repr(m.group(0)[:1200]))
-          print('PRESENTATION_GFONT',re.findall(r'https://fonts.googleapis.com[^" ]+',s)[:2])
+          for sel in ['.ig-total','.ig-total b','.ig-total em','.ig-total span','.ig-total .', '.ig-ask-h b','.ig-check li']:
+            print('SELECTOR',sel)
+            for m in list(re.finditer(re.escape(sel)+r'[^{}]{0,130}\{[^{}]{0,1500}\}',s))[-12:]:
+              print('RULE',repr(m.group(0)[:1500]))
           PY
-          command -v google-chrome || true
-          command -v chromium || true
-          node -v
-      - name: Capture live slide typography for visual inspection
-        shell: bash
+      - name: Browser geometry for policy slide and summary banner
         run: |
-          mkdir -p /tmp/hse-inspect
-          cd /tmp/hse-inspect
+          mkdir -p /tmp/hse && cd /tmp/hse
           npm install --no-save playwright-core@1.58.2 --silent
           cat > check.cjs <<'JS'
           const {chromium}=require('playwright-core');
           (async()=>{
-            let browser;
-            try {
-              browser=await chromium.launch({headless:true,executablePath:'/usr/bin/google-chrome',args:['--no-sandbox','--disable-dev-shm-usage']});
-              const page=await browser.newPage({viewport:{width:1600,height:960},deviceScaleFactor:1});
-              await page.goto('https://safety-academy-hse.pages.dev/executive/?typography-review=20261122',{waitUntil:'domcontentloaded',timeout:45000});
-              await page.waitForTimeout(1500);
-              console.log('TITLE',await page.title());
-              console.log('BUTTONS',JSON.stringify(await page.locator('button').allTextContents()).slice(0,2500));
-              const nav=page.locator('button').filter({hasText:/การสนับสนุนที่ต้องการจากผู้บริหาร/});
-              console.log('TARGET_BUTTON_COUNT',await nav.count());
-              if(await nav.count()>0)await nav.first().click();
-              await page.waitForTimeout(1700);
-              const styles=await page.evaluate(()=>[...document.querySelectorAll('.uat-checks li,.ig-check li,.uat-ask h3,.ig-ask-h b,.fx-env b')].filter(x=>x.getClientRects().length).slice(0,20).map(x=>{let st=getComputedStyle(x),r=x.getBoundingClientRect();return {text:x.textContent.trim().slice(0,75),font:st.fontFamily,size:st.fontSize,line:st.lineHeight,height:Math.round(r.height),width:Math.round(r.width),color:st.color}}));
-              console.log('STYLES',JSON.stringify(styles));
-              const img=await page.screenshot({type:'jpeg',quality:53});
-              console.log('SCREENSHOT_BASE64',img.toString('base64'));
-              console.log('SCREENSHOT_BYTES',img.length);
-            } catch(e){console.log('BROWSER_ERROR',String(e).slice(0,1600));process.exitCode=1}
-            finally{if(browser)await browser.close()}
+            const browser=await chromium.launch({headless:true,executablePath:'/usr/bin/google-chrome',args:['--no-sandbox']});
+            const page=await browser.newPage({viewport:{width:1600,height:960}});
+            await page.goto('https://safety-academy-hse.pages.dev/executive/?typography-audit=2',{waitUntil:'networkidle',timeout:45000});
+            await page.locator('button').filter({hasText:/การสนับสนุนที่ต้องการจากผู้บริหาร/}).first().click();
+            await page.evaluate(()=>document.fonts.ready);
+            await page.waitForTimeout(700);
+            const data=await page.evaluate(()=>{
+              const el=document.querySelector('.ig-total');
+              if(!el)return {error:'no ig-total'};
+              const props=x=>{const r=x.getBoundingClientRect(),s=getComputedStyle(x);return {tag:x.tagName,cls:x.className,text:x.textContent?.trim().slice(0,220),font:s.font,size:s.fontSize,line:s.lineHeight,whiteSpace:s.whiteSpace,display:s.display,flex:s.flex,gridCols:s.gridTemplateColumns,justify:s.justifyContent,wrap:s.flexWrap,textOverflow:s.textOverflow,overflow:s.overflow,width:Math.round(r.width),height:Math.round(r.height),scrollWidth:x.scrollWidth,scrollHeight:x.scrollHeight,left:Math.round(r.left),right:Math.round(r.right),top:Math.round(r.top),bottom:Math.round(r.bottom),padding:s.padding}};
+              return {parent:props(el),children:[...el.children].map(props),stage:props(document.querySelector('.stage')),viewport:{width:window.innerWidth,height:window.innerHeight}}
+            });
+            console.log('BANNER_GEOMETRY',JSON.stringify(data));
+            await browser.close()
           })();
           JS
           node check.cjs
