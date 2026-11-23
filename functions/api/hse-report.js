@@ -28,7 +28,7 @@ export async function onRequestGet({ request }) {
   try {
     const [kpiRows,actualRows,planRows] = await Promise.all(TABS.map(tabRows));
     const monthly=kpiRows.filter(r=>Number(r.Year)===2026 && Number(r.Month)>=1 && Number(r.Month)<=12 && ['SGE','AESCON'].includes(r.Company));
-    const plan2569=actualRows.filter(r=>String(r.PlanYear)==='2569');
+    const plan2569=actualRows.filter(r=>['SGE','AESCON'].includes(r.Company) && (r.PlanYear == null || String(r.PlanYear)==='2569')); // GViz infers mixed PlanYear cells as null; this tab contains only 2569 records
     const plan2570=planRows.filter(r=>String(r.PlanYear)==='2570' && ['SGE','AESCON'].includes(r.Company));
     const kpi={};
     const planActual={};
