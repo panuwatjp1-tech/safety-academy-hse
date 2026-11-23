@@ -1,8 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Safety Academy HSE App">
-<defs><linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#113C58"/><stop offset="1" stop-color="#071827"/></linearGradient><linearGradient id="shield" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#54E3D0"/><stop offset="1" stop-color="#128FA8"/></linearGradient></defs>
-<rect x="2" y="2" width="60" height="60" rx="16" fill="url(#bg)" stroke="#52DCCB" stroke-width="2"/>
-<path d="M32 9 51 17v16c0 13-7 19-19 25-12-6-19-12-19-25V17Z" fill="url(#shield)"/>
-<path d="M20 35a12 12 0 0 1 24 0" fill="#F7FDFF"/><path d="M19 36h26" stroke="#F7FDFF" stroke-width="6" stroke-linecap="round"/>
-<path d="M32 24v12" stroke="#FFC15C" stroke-width="4" stroke-linecap="round"/>
-<path d="m25 46 5 5 11-12" fill="none" stroke="#F7FDFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="HSE Safety Executive">
+  <defs>
+    <linearGradient id="navy" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#1C405F"/><stop offset="1" stop-color="#071626"/>
+    </linearGradient>
+    <linearGradient id="mint" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#72F3DC"/><stop offset="1" stop-color="#12A9B5"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#navy)" stroke="#50CDBF" stroke-width="2"/>
+  <path d="M32 9 50 17v17c0 12-8 18-18 23C22 52 14 46 14 34V17Z" fill="url(#mint)"/>
+  <path d="M22 35v-3c0-7 4-11 10-11s10 4 10 11v3" fill="none" stroke="#09283B" stroke-linecap="round" stroke-width="4"/>
+  <path d="M32 21v10" stroke="#09283B" stroke-width="4" stroke-linecap="round"/>
+  <path d="M19 36h26" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+  <path d="m25 45 5 5 10-10" fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
 </svg>
